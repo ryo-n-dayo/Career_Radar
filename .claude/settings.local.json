@@ -35,7 +35,13 @@
       "Bash(open http://localhost:3001)",
       "mcp__Claude_Preview__preview_start",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(gh auth *)",
+      "Bash(brew install *)",
+      "Bash(open https://github.com/login/device)",
+      "Bash(osascript -e 'tell application \"Terminal\" to do script \"sudo chown -R $\\(whoami\\):staff ~/.config && echo DONE\"' -e 'tell application \"Terminal\" to activate')",
+      "Bash(gh pr create --title 'fix 3-pane grid, remove AI熱量, add AI分析 company profile view' --body ' *)"
     ]
   }
 }
