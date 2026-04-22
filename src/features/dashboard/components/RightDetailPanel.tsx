@@ -1,0 +1,194 @@
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
+
+import type { RadarItem } from "../types/radarItem";
+
+type Props = {
+  item?: RadarItem;
+  onClose: () => void;
+};
+
+function Section({
+  title,
+  children,
+  delay = 0
+}: {
+  title: string;
+  children: React.ReactNode;
+  delay?: number;
+}) {
+  return (
+    <section
+      className="yui-row rounded-2xl border border-border bg-background p-4"
+      style={{ ["--yui-delay" as string]: `${delay}s` }}
+    >
+      <div className="mb-2 flex items-center gap-2">
+        <div className="h-3 w-[3px] rounded-full bg-foreground/60" />
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {title}
+        </h4>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+export function RightDetailPanel({ item, onClose }: Props) {
+  return (
+    <aside className="flex h-full flex-col bg-muted/20">
+      <div className="flex items-center gap-2 px-4 py-3">
+        <div className="text-sm font-semibold tracking-tight">詳細</div>
+        <div className="ml-auto flex items-center gap-1.5">
+          <Button variant="outline" size="sm" className="yui-pill" disabled={!item}>
+            ESに引用
+          </Button>
+          <Button variant="secondary" size="sm" className="yui-pill" disabled={!item}>
+            AI分析
+          </Button>
+          <Button variant="ghost" size="sm" className="yui-pill" onClick={onClose}>
+            閉じる
+          </Button>
+        </div>
+      </div>
+
+      <Separator />
+
+      <div className="min-h-0 flex-1 overflow-auto p-4">
+        {!item ? (
+          <div className="rounded-2xl border border-dashed border-border bg-background/40 p-6 text-center text-sm text-muted-foreground">
+            左のカードから選択してください
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {/* Hero */}
+            <div
+              className="yui-row rounded-2xl border border-border bg-background p-5"
+              style={{ ["--yui-delay" as string]: "0s" }}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex flex-wrap items-center gap-1.5">
+                    <span className="yui-pill bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                      {item.category}
+                    </span>
+                    <span
+                      className={cn(
+                        "yui-pill px-2 py-0.5 text-[10px] font-medium",
+                        item.trust === "official"
+                          ? "bg-foreground/5 text-foreground/70"
+                          : "bg-amber-100/60 text-amber-800 dark:bg-amber-950/40 dark:text-amber-200"
+                      )}
+                    >
+                      {item.trust === "official" ? "公式認証" : "要確認"}
+                    </span>
+                  </div>
+                  <h2 className="text-xl font-semibold tracking-tight">{item.companyName}</h2>
+                  <p className="mt-2 text-sm leading-relaxed text-foreground/80">{item.content}</p>
+                </div>
+              </div>
+
+              {/* Heat ring */}
+              <div className="mt-4 flex items-center gap-3 border-t border-border pt-3">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  AI熱量
+                </div>
+                <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="yui-bar h-full rounded-full bg-foreground"
+                    style={{ ["--scale" as string]: item.aiHeat / 100, width: "100%" }}
+                  />
+                </div>
+                <div className="tabular-nums text-sm font-semibold">{item.aiHeat}</div>
+              </div>
+
+              <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+                <span className="tabular-nums">{item.date}</span>
+                <span>·</span>
+                <span className="yui-pill bg-foreground/5 px-2 py-0.5 font-medium text-foreground/70">
+                  {item.deadlineLabel}
+                </span>
+              </div>
+            </div>
+
+            {/* Keywords */}
+            {item.keywords.length > 0 && (
+              <Section title="社風キーワード" delay={0.05}>
+                <div className="flex flex-wrap gap-1.5">
+                  {item.keywords.map((k) => (
+                    <span
+                      key={k}
+                      className="yui-pill bg-foreground/[0.04] px-2.5 py-0.5 text-xs text-foreground/80"
+                    >
+                      {k}
+                    </span>
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {/* Sources */}
+            <Section title="ソース" delay={0.1}>
+              <ul className="space-y-1.5">
+                {item.sources.map((s) => (
+                  <li key={s.url}>
+                    <a
+                      href={s.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-sm hover:underline"
+                    >
+                      <span className="yui-pill bg-foreground text-background px-2 py-0.5 text-[10px] font-medium">
+                        {s.type}
+                      </span>
+                      <span className="truncate text-foreground/80">{s.url}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </Section>
+
+            {/* AI分析 placeholder */}
+            <Section title="AI分析" delay={0.15}>
+              <p className="text-sm text-muted-foreground">
+                熱量スコアの根拠、競合比較、志望動機の素材をここに表示します。
+              </p>
+            </Section>
+
+            {/* Wiki placeholder */}
+            <Section title="Wiki" delay={0.2}>
+              <p className="text-sm text-muted-foreground">
+                会社概要、選考メモ、参考リンク、引用候補を蓄積します。
+              </p>
+            </Section>
+
+            {/* X insights */}
+            {item.xInsights && item.xInsights.length > 0 && (
+              <Section title="Xからの社員口コミ" delay={0.25}>
+                <div className="space-y-2">
+                  {item.xInsights.map((insight) => (
+                    <div
+                      key={insight.date}
+                      className="rounded-xl border border-border bg-muted/30 p-3"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold">{insight.author}</span>
+                        <span className="yui-pill bg-foreground/5 px-2 py-0.5 text-[10px] text-foreground/60">
+                          {insight.role}
+                        </span>
+                        <span className="ml-auto text-xs tabular-nums text-muted-foreground">
+                          {insight.date}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-sm leading-relaxed">{insight.message}</p>
+                    </div>
+                  ))}
+                </div>
+              </Section>
+            )}
+          </div>
+        )}
+      </div>
+    </aside>
+  );
+}

@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -sI http://localhost:3002 -m 5)",
+      "Bash(curl -sI http://localhost:3000 -m 5)",
+      "Bash(npm run *)",
+      "Bash(echo \"pid=$!\")",
+      "Bash(curl -sI http://localhost:3000 -m 10)",
+      "Bash(curl -s -m 60 -o /tmp/nextres.html -w \"status=%{http_code}\\\\ntime=%{time_total}\\\\n\" http://localhost:3000/)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(rm -rf .next)",
+      "Bash(timeout 120 npx next build)",
+      "Bash(npx next *)",
+      "Bash(npx tsc *)",
+      "Bash(pkill -f \"next-server\")",
+      "Bash(disown)",
+      "Bash(curl -s -o /tmp/res.html -w \"status=%{http_code} size=%{size_download} time=%{time_total}\\\\n\" -m 120 http://localhost:3000/)",
+      "Bash(ps -p 34430 -o pid,pcpu,pmem,etime,command)",
+      "Bash(nc -zv -w 3 localhost 3000)",
+      "Bash(curl -sv -m 5 http://localhost:3000/_next/static)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(echo \"---exit=$?\")",
+      "Bash(npx eslint *)",
+      "Bash(npx prisma *)",
+      "Bash(gh api *)",
+      "Bash(gh repo *)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl -s https://api.github.com/repos/yui540/css-animations/contents/)",
+      "Bash(curl -s https://api.github.com/repos/yui540/css-animations/contents/2026-04-22)",
+      "Bash(python3 -c \"import json,sys; data=json.load\\(sys.stdin\\); print\\('\\\\n'.join\\(f['name'] for f in data\\)\\)\")",
+      "Bash(curl -s https://raw.githubusercontent.com/yui540/css-animations/main/2026-04-22/tips-1.html)",
+      "Bash(curl -s https://raw.githubusercontent.com/yui540/css-animations/main/2026-04-22/tips-3.html)",
+      "Bash(curl -s https://raw.githubusercontent.com/yui540/css-animations/main/2026-04-18/tips-1.html)"
+    ]
+  }
+}

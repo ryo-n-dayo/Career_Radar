@@ -1,0 +1,98 @@
+
+> nextjs-app@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 17.9s
+ ○ Compiling / ...
+ ✓ Compiled / in 2304.2s (556 modules)
+ ✓ Compiled in 364ms (285 modules)
+Error: ENOENT: no such file or directory, scandir '/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/src/app'
+    at async Object.readdir (node:internal/fs/promises:950:18)
+    at async /Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/lib/recursive-readdir.js:39:29
+    at async Promise.all (index 0)
+    at async recursiveReadDir (/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/lib/recursive-readdir.js:32:25)
+    at async /Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/server/future/route-matcher-providers/dev/helpers/file-reader/batched-file-reader.js:71:25
+    at async Promise.all (index 0)
+    at async BatchedFileReader.load (/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/server/future/route-matcher-providers/dev/helpers/file-reader/batched-file-reader.js:67:25)
+    at async /Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/server/future/route-matcher-providers/dev/helpers/file-reader/batched-file-reader.js:41:26 {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'scandir',
+  path: '/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/src/app'
+}
+ ⨯ unhandledRejection: Error: ENOENT: no such file or directory, scandir '/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/src/app'
+    at async Object.readdir (node:internal/fs/promises:950:18)
+    at async /Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/lib/recursive-readdir.js:39:29
+    at async Promise.all (index 0)
+    at async recursiveReadDir (/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/lib/recursive-readdir.js:32:25)
+    at async /Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/server/future/route-matcher-providers/dev/helpers/file-reader/batched-file-reader.js:71:25
+    at async Promise.all (index 0)
+    at async BatchedFileReader.load (/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/server/future/route-matcher-providers/dev/helpers/file-reader/batched-file-reader.js:67:25)
+    at async /Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/server/future/route-matcher-providers/dev/helpers/file-reader/batched-file-reader.js:41:26 {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'scandir',
+  path: '/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/src/app'
+}
+ ⨯ unhandledRejection: Error: ENOENT: no such file or directory, scandir '/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/src/app'
+    at async Object.readdir (node:internal/fs/promises:950:18)
+    at async /Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/lib/recursive-readdir.js:39:29
+    at async Promise.all (index 0)
+    at async recursiveReadDir (/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/lib/recursive-readdir.js:32:25)
+    at async /Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/server/future/route-matcher-providers/dev/helpers/file-reader/batched-file-reader.js:71:25
+    at async Promise.all (index 0)
+    at async BatchedFileReader.load (/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/server/future/route-matcher-providers/dev/helpers/file-reader/batched-file-reader.js:67:25)
+    at async /Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/server/future/route-matcher-providers/dev/helpers/file-reader/batched-file-reader.js:41:26 {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'scandir',
+  path: '/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/src/app'
+}
+ ⨯ Module not found: Error: Can't resolve 'next-flight-client-entry-loader' in '/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app'
+Error: ENOENT: no such file or directory, scandir '/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/src/app'
+    at async Object.readdir (node:internal/fs/promises:950:18)
+    at async /Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/lib/recursive-readdir.js:39:29
+    at async Promise.all (index 0)
+    at async recursiveReadDir (/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/lib/recursive-readdir.js:32:25)
+    at async /Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/server/future/route-matcher-providers/dev/helpers/file-reader/batched-file-reader.js:71:25
+    at async Promise.all (index 0)
+    at async BatchedFileReader.load (/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/server/future/route-matcher-providers/dev/helpers/file-reader/batched-file-reader.js:67:25)
+    at async /Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/server/future/route-matcher-providers/dev/helpers/file-reader/batched-file-reader.js:41:26 {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'scandir',
+  path: '/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/src/app'
+}
+ ⨯ unhandledRejection: Error: ENOENT: no such file or directory, scandir '/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/src/app'
+    at async Object.readdir (node:internal/fs/promises:950:18)
+    at async /Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/lib/recursive-readdir.js:39:29
+    at async Promise.all (index 0)
+    at async recursiveReadDir (/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/lib/recursive-readdir.js:32:25)
+    at async /Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/server/future/route-matcher-providers/dev/helpers/file-reader/batched-file-reader.js:71:25
+    at async Promise.all (index 0)
+    at async BatchedFileReader.load (/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/server/future/route-matcher-providers/dev/helpers/file-reader/batched-file-reader.js:67:25)
+    at async /Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/server/future/route-matcher-providers/dev/helpers/file-reader/batched-file-reader.js:41:26 {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'scandir',
+  path: '/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/src/app'
+}
+ ⨯ unhandledRejection: Error: ENOENT: no such file or directory, scandir '/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/src/app'
+    at async Object.readdir (node:internal/fs/promises:950:18)
+    at async /Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/lib/recursive-readdir.js:39:29
+    at async Promise.all (index 0)
+    at async recursiveReadDir (/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/lib/recursive-readdir.js:32:25)
+    at async /Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/server/future/route-matcher-providers/dev/helpers/file-reader/batched-file-reader.js:71:25
+    at async Promise.all (index 0)
+    at async BatchedFileReader.load (/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/server/future/route-matcher-providers/dev/helpers/file-reader/batched-file-reader.js:67:25)
+    at async /Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/node_modules/next/dist/server/future/route-matcher-providers/dev/helpers/file-reader/batched-file-reader.js:41:26 {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'scandir',
+  path: '/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/src/app'
+}
+ ⨯ Module not found: Error: Can't resolve 'next-flight-client-entry-loader' in '/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app'

@@ -1,0 +1,305 @@
+// Career Radar - Prisma schema (PostgreSQL)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+enum PostSource {
+  X
+  INSTAGRAM
+  LINKEDIN
+  WEB
+}
+
+enum EventCategory {
+  INTERN
+  EARLY_SELECTION
+  SEMINAR
+  FULL_TIME
+  INFO_SESSION
+}
+
+enum EventStatus {
+  TODO
+  APPLIED
+  BOOKMARKED
+  DONE
+  MISSED
+}
+
+enum ModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String?  @unique
+  name      String?
+  imageUrl  String?
+
+  // Google integration
+  googleAccessToken  String?
+  googleRefreshToken String?
+  googleTokenExpiry  DateTime?
+
+  // Relations
+  posts     Post[]
+  events    Event[]
+  analyses  AIAnalysis[]
+  wiki      WikiEntry[]
+  esDrafts  ESDraft[]
+  favorites FavoriteCompany[]
+  emails    Email[]
+  calendarEvents CalendarEvent[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Company {
+  id           String  @id @default(cuid())
+  name         String
+  officialUrl  String?
+  careersUrl   String?
+  linkedinUrl  String?
+  xUrl         String?
+  instagramUrl String?
+  industry     String?
+
+  // Site monitoring
+  lastFetchedHash String?
+  lastFetchedAt   DateTime?
+
+  // Relations
+  posts     Post[]
+  events    Event[]
+  analyses  AIAnalysis[]
+  wiki      WikiEntry[]
+  esDrafts  ESDraft[]
+  favorites FavoriteCompany[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+
+model Post {
+  id        String     @id @default(cuid())
+  userId    String
+  companyId String?
+
+  source    PostSource
+  url       String?
+  title     String?
+  content   String?
+  postedAt  DateTime?
+
+  // Optional ingestion metadata
+  externalId String? // e.g. tweet id / linkedin post id
+  author     String?
+
+  // AI-generated summary and matched keywords (for X imports)
+  aiSummary       String?
+  matchedKeywords Json?
+
+  // New-item flag (cleared when user marks-read)
+  isNew Boolean @default(true)
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  // Relations
+  sources Source[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId, postedAt])
+  @@index([source])
+  @@index([userId, isNew, createdAt])
+  @@unique([source, externalId])
+}
+
+model Source {
+  id          String   @id @default(cuid())
+  postId      String
+  post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  type        String   // SourceType (enumはSQLiteで弱いので文字列で保持)
+  url         String
+  fetchedAt   DateTime @default(now())
+  
+  @@index([postId])
+  @@index([type])
+}
+
+model Event {
+  id        String        @id @default(cuid())
+  userId    String
+  companyId String
+
+  category  EventCategory
+  title     String
+  content   String?
+
+  // Scheduling & deadline
+  startsAt  DateTime?
+  endsAt    DateTime?
+  deadline  DateTime?
+
+  // Per-user status tracking
+  status    EventStatus   @default(TODO)
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId, deadline])
+  @@index([userId, status])
+}
+
+model AIAnalysis {
+  id        String   @id @default(cuid())
+  userId    String
+  companyId String
+
+  // Time-series friendly
+  analyzedAt DateTime @default(now())
+
+  heatScore  Int      // 0-100
+  summary    String?
+  // Persona / culture keywords
+  keywords   Json
+
+  // Link back to source context (optional)
+  sourcePostIds Json?
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId, analyzedAt])
+  @@index([userId, companyId])
+}
+
+model WikiEntry {
+  id        String           @id @default(cuid())
+  userId    String
+  companyId String
+
+  title     String
+  content   String
+
+  // Moderation for user-generated content
+  moderationStatus ModerationStatus @default(PENDING)
+  moderatedAt      DateTime?
+  moderationNote   String?
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId, createdAt])
+  @@index([moderationStatus])
+}
+
+model ESDraft {
+  id        String   @id @default(cuid())
+  userId    String
+  companyId String?
+
+  title     String
+  content   String
+
+  // Source citations (optional)
+  citedPostIds  Json?
+  citedEventIds Json?
+  citedWikiIds  Json?
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, updatedAt])
+  @@index([companyId])
+}
+
+model FavoriteCompany {
+  id        String   @id @default(cuid())
+  userId    String
+  companyId String
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, companyId])
+  @@index([companyId])
+}
+
+model Email {
+  id        String   @id @default(cuid())
+  userId    String
+
+  gmailId   String   @unique
+  from      String
+  to        String
+  subject   String
+  body      String
+  snippet   String?
+  timestamp DateTime
+
+  labels    Json?
+  isRead    Boolean  @default(false)
+  isStarred Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, timestamp])
+  @@index([gmailId])
+}
+
+model CalendarEvent {
+  id        String   @id @default(cuid())
+  userId    String
+
+  googleEventId String  @unique
+  title     String
+  description String?
+  startTime DateTime
+  endTime   DateTime
+  location  String?
+
+  companyId String?
+
+  isAllDay  Boolean  @default(false)
+  attendees Json?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, startTime])
+  @@index([googleEventId])
+}
