@@ -14,8 +14,8 @@ import { NewItemsBanner } from "./NewItemsBanner";
 import { RadarTable, type SortKey } from "./RadarTable";
 import { RightDetailPanel } from "./RightDetailPanel";
 
-const GRID_OPEN = "240px minmax(1fr, 900px) 420px";
-const GRID_CLOSED = "240px minmax(1fr, 900px) 0px";
+const GRID_OPEN = "240px minmax(0, 1fr) 420px";
+const GRID_CLOSED = "240px minmax(0, 1fr) 0px";
 
 type ViewMode = "db" | "calendar";
 

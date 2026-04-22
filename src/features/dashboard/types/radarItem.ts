@@ -25,5 +25,19 @@ export type RadarItem = {
     date: string;
     message: string;
   }[];
+  companyProfile?: CompanyProfile;
+};
+
+export type CompanyProfile = {
+  overview: string;
+  industry: string;
+  founded: string;
+  headquarters: string;
+  employees: string;
+  revenue?: string;
+  hiringCount: string;
+  hiringRoles: string[];
+  selectionFlow?: string[];
+  website?: string;
 };
 

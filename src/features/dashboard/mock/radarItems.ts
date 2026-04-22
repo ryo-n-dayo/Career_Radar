@@ -19,7 +19,19 @@ export const radarItems: RadarItem[] = [
       { author: "元社員A", role: "エンジニア", date: "2026-04-18", message: "裁量が大きく、技術ブログで情報発信する雰囲気がある。" },
       { author: "社員B", role: "人事", date: "2026-04-14", message: "サマーインターンはWeb/AI枠で新卒にも積極的。" }
     ],
-    trust: "official"
+    trust: "official",
+    companyProfile: {
+      overview: "Web/AI領域のプロダクト開発を主軸に、SaaSと受託を組み合わせた事業展開。技術ブログ・OSS活動に積極的。",
+      industry: "情報・通信 / SaaS",
+      founded: "2014年",
+      headquarters: "東京都渋谷区",
+      employees: "約420名",
+      revenue: "78億円（2025年3月期）",
+      hiringCount: "新卒30名 / 26卒予定",
+      hiringRoles: ["ソフトウェアエンジニア", "AIリサーチャー", "プロダクトデザイナー"],
+      selectionFlow: ["書類選考", "コーディング課題", "1次面接", "最終面接"],
+      website: "https://sampletech.example.com"
+    }
   },
   {
     id: "r2",
@@ -34,7 +46,19 @@ export const radarItems: RadarItem[] = [
       { type: "X", url: "https://x.com/exampleconsulting/status/24680", fetchedAt: new Date("2026-04-18") },
       { type: "OFFICIAL_WEB", url: "https://exampleconsulting.com/early", fetchedAt: new Date("2026-04-19") }
     ],
-    trust: "needs_review"
+    trust: "needs_review",
+    companyProfile: {
+      overview: "戦略系コンサルティングファーム。大企業のDX・新規事業立ち上げ支援を中心に、ケース面接を重視した選考。",
+      industry: "コンサルティング",
+      founded: "2008年",
+      headquarters: "東京都千代田区",
+      employees: "約650名",
+      revenue: "非公開",
+      hiringCount: "新卒20〜25名",
+      hiringRoles: ["コンサルタント", "ビジネスアナリスト"],
+      selectionFlow: ["ES/WEBテスト", "ケース面接(2回)", "最終面接"],
+      website: "https://exampleconsulting.com"
+    }
   },
   {
     id: "r3",
@@ -51,7 +75,18 @@ export const radarItems: RadarItem[] = [
     xInsights: [
       { author: "元社員C", role: "デザイナー", date: "2026-04-12", message: "説明会ではプロダクトのUXへのこだわりが強調されていた。" }
     ],
-    trust: "needs_review"
+    trust: "needs_review",
+    companyProfile: {
+      overview: "自社メディア運営とコンテンツ配信プラットフォーム開発。フルリモート・副業可の柔軟な働き方が特徴。",
+      industry: "メディア / インターネット",
+      founded: "2017年",
+      headquarters: "東京都港区",
+      employees: "約150名",
+      hiringCount: "新卒10名程度",
+      hiringRoles: ["エンジニア", "編集者", "ビジネス職"],
+      selectionFlow: ["書類選考", "カジュアル面談", "最終面接"],
+      website: "https://medialab.example.com"
+    }
   },
   {
     id: "r4",
@@ -66,7 +101,19 @@ export const radarItems: RadarItem[] = [
       { type: "OFFICIAL_WEB", url: "https://sunrisefintech.com/recruit", fetchedAt: new Date("2026-04-22") }
     ],
     saved: true,
-    trust: "official"
+    trust: "official",
+    companyProfile: {
+      overview: "金融機関向けのAPI・セキュリティ基盤を提供。安定した収益と高いコンプライアンス基準が特徴。",
+      industry: "金融 / FinTech",
+      founded: "2011年",
+      headquarters: "東京都中央区",
+      employees: "約800名",
+      revenue: "120億円（2025年3月期）",
+      hiringCount: "新卒40名",
+      hiringRoles: ["エンジニア", "セキュリティ", "総合職"],
+      selectionFlow: ["ES", "適性検査", "技術面接", "最終面接"],
+      website: "https://sunrisefintech.com"
+    }
   },
   {
     id: "r5",
@@ -81,7 +128,18 @@ export const radarItems: RadarItem[] = [
       { type: "X", url: "https://x.com/greenmobility/status/13579", fetchedAt: new Date("2026-04-10") },
       { type: "OFFICIAL_WEB", url: "https://greenmobility.jp/session", fetchedAt: new Date("2026-04-11") }
     ],
-    trust: "official"
+    trust: "official",
+    companyProfile: {
+      overview: "EV・MaaS領域のハードウェア×ソフトウェア開発。社会貢献とモビリティ未来創造をミッションに掲げる。",
+      industry: "モビリティ / 製造",
+      founded: "2019年",
+      headquarters: "東京都渋谷区",
+      employees: "約280名",
+      hiringCount: "新卒15名",
+      hiringRoles: ["組込みエンジニア", "機械設計", "ソフトウェア"],
+      selectionFlow: ["書類選考", "面接(2回)", "最終面接"],
+      website: "https://greenmobility.jp"
+    }
   },
   {
     id: "r6",
@@ -96,7 +154,18 @@ export const radarItems: RadarItem[] = [
       { type: "X", url: "https://x.com/neongames/status/45678", fetchedAt: new Date("2026-04-25") },
       { type: "OFFICIAL_WEB", url: "https://neongames.co.jp/intern", fetchedAt: new Date("2026-04-26") }
     ],
-    trust: "needs_review"
+    trust: "needs_review",
+    companyProfile: {
+      overview: "オリジナルIPゲームの企画・開発。Unityを用いたチーム開発とスピード感のある意思決定が強み。",
+      industry: "ゲーム / エンタメ",
+      founded: "2015年",
+      headquarters: "東京都新宿区",
+      employees: "約320名",
+      hiringCount: "新卒25名",
+      hiringRoles: ["ゲームプランナー", "Unityエンジニア", "3Dアーティスト"],
+      selectionFlow: ["ポートフォリオ提出", "面接(2回)", "最終面接"],
+      website: "https://neongames.co.jp"
+    }
   },
   {
     id: "r7",
@@ -110,7 +179,19 @@ export const radarItems: RadarItem[] = [
     sources: [
       { type: "OFFICIAL_WEB", url: "https://atlas-mfg.example.com/seminar", fetchedAt: new Date("2026-04-12") }
     ],
-    trust: "needs_review"
+    trust: "needs_review",
+    companyProfile: {
+      overview: "大手製造業向けのDXソリューション。工場の現場に入り込んだコンサルティング×システム導入が強み。",
+      industry: "製造 / SIer",
+      founded: "2005年",
+      headquarters: "愛知県名古屋市",
+      employees: "約1,200名",
+      revenue: "230億円（2025年3月期）",
+      hiringCount: "新卒50名",
+      hiringRoles: ["SE", "生産技術", "営業"],
+      selectionFlow: ["ES", "WEBテスト", "面接(2回)", "最終面接"],
+      website: "https://atlas-mfg.example.com"
+    }
   },
   {
     id: "r8",
@@ -126,7 +207,19 @@ export const radarItems: RadarItem[] = [
       { type: "X", url: "https://x.com/cloudnote/status/34567", fetchedAt: new Date("2026-04-16") }
     ],
     saved: true,
-    trust: "official"
+    trust: "official",
+    companyProfile: {
+      overview: "ノートSaaSを主力に、データ駆動のプロダクト開発とユーザー志向を徹底。海外展開も視野に。",
+      industry: "SaaS / 生産性ツール",
+      founded: "2016年",
+      headquarters: "東京都目黒区",
+      employees: "約210名",
+      revenue: "45億円（2025年12月期）",
+      hiringCount: "新卒12名",
+      hiringRoles: ["プロダクトマネージャー", "エンジニア", "デザイナー"],
+      selectionFlow: ["ポートフォリオ提出", "カジュアル面談", "面接(2回)", "最終面接"],
+      website: "https://cloudnote.io"
+    }
   },
   {
     id: "r9",
@@ -141,7 +234,18 @@ export const radarItems: RadarItem[] = [
       { type: "X", url: "https://x.com/openedu/status/78901", fetchedAt: new Date("2026-04-08") },
       { type: "OFFICIAL_WEB", url: "https://openedu.example.com/meetup", fetchedAt: new Date("2026-04-09") }
     ],
-    trust: "needs_review"
+    trust: "needs_review",
+    companyProfile: {
+      overview: "教育×AIのEdTech企業。学習体験の個別最適化をミッションに、コミュニティ運営にも注力。",
+      industry: "EdTech",
+      founded: "2018年",
+      headquarters: "東京都文京区",
+      employees: "約95名",
+      hiringCount: "新卒5〜8名",
+      hiringRoles: ["エンジニア", "コンテンツ開発", "カスタマーサクセス"],
+      selectionFlow: ["書類選考", "面接(2回)"],
+      website: "https://openedu.example.com"
+    }
   },
   {
     id: "r10",
@@ -156,7 +260,19 @@ export const radarItems: RadarItem[] = [
       { type: "OFFICIAL_WEB", url: "https://securestack.dev/jobs", fetchedAt: new Date("2026-04-23") },
       { type: "X", url: "https://x.com/securestack/status/54321", fetchedAt: new Date("2026-04-24") }
     ],
-    trust: "official"
+    trust: "official",
+    companyProfile: {
+      overview: "セキュリティ領域のクラウド基盤・SREを提供。エンジニアの学習支援制度が充実。",
+      industry: "セキュリティ / クラウド",
+      founded: "2013年",
+      headquarters: "東京都品川区",
+      employees: "約380名",
+      revenue: "62億円（2025年12月期）",
+      hiringCount: "新卒18名",
+      hiringRoles: ["セキュリティエンジニア", "SRE", "バックエンド"],
+      selectionFlow: ["ES", "技術課題", "面接(2回)", "最終面接"],
+      website: "https://securestack.dev"
+    }
   }
 ];
 

@@ -1,8 +1,81 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
-import type { RadarItem } from "../types/radarItem";
+import type { CompanyProfile, RadarItem } from "../types/radarItem";
+
+function DataRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start gap-3 py-1.5 text-sm">
+      <div className="w-20 shrink-0 text-xs text-muted-foreground">{label}</div>
+      <div className="min-w-0 flex-1 text-foreground/90">{value}</div>
+    </div>
+  );
+}
+
+function CompanyAnalysis({ profile }: { profile: CompanyProfile }) {
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-sm leading-relaxed text-foreground/80">{profile.overview}</p>
+
+      <div className="divide-y divide-border rounded-xl border border-border bg-muted/30 px-3">
+        <DataRow label="業種" value={profile.industry} />
+        <DataRow label="設立" value={profile.founded} />
+        <DataRow label="本社" value={profile.headquarters} />
+        <DataRow label="従業員数" value={profile.employees} />
+        {profile.revenue && <DataRow label="売上" value={profile.revenue} />}
+        <DataRow label="採用人数" value={profile.hiringCount} />
+      </div>
+
+      <div>
+        <div className="mb-1.5 text-xs text-muted-foreground">募集職種</div>
+        <div className="flex flex-wrap gap-1.5">
+          {profile.hiringRoles.map((r) => (
+            <span
+              key={r}
+              className="yui-pill bg-foreground/[0.04] px-2.5 py-0.5 text-xs text-foreground/80"
+            >
+              {r}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {profile.selectionFlow && profile.selectionFlow.length > 0 && (
+        <div>
+          <div className="mb-1.5 text-xs text-muted-foreground">選考フロー</div>
+          <ol className="flex flex-wrap items-center gap-1.5 text-xs">
+            {profile.selectionFlow.map((step, i) => (
+              <li key={step} className="flex items-center gap-1.5">
+                <span className="yui-pill bg-foreground/5 px-2 py-0.5 font-medium text-foreground/80">
+                  {i + 1}. {step}
+                </span>
+                {i < profile.selectionFlow!.length - 1 && (
+                  <span className="text-muted-foreground">→</span>
+                )}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {profile.website && (
+        <a
+          href={profile.website}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-foreground/70 underline hover:text-foreground"
+        >
+          {profile.website}
+        </a>
+      )}
+    </div>
+  );
+}
 
 type Props = {
   item?: RadarItem;
@@ -35,6 +108,12 @@ function Section({
 }
 
 export function RightDetailPanel({ item, onClose }: Props) {
+  const [showAnalysis, setShowAnalysis] = useState(false);
+
+  useEffect(() => {
+    setShowAnalysis(false);
+  }, [item?.id]);
+
   return (
     <aside className="flex h-full flex-col bg-muted/20">
       <div className="flex items-center gap-2 px-4 py-3">
@@ -43,7 +122,13 @@ export function RightDetailPanel({ item, onClose }: Props) {
           <Button variant="outline" size="sm" className="yui-pill" disabled={!item}>
             ESに引用
           </Button>
-          <Button variant="secondary" size="sm" className="yui-pill" disabled={!item}>
+          <Button
+            variant={showAnalysis ? "default" : "secondary"}
+            size="sm"
+            className="yui-pill"
+            disabled={!item}
+            onClick={() => setShowAnalysis((v) => !v)}
+          >
             AI分析
           </Button>
           <Button variant="ghost" size="sm" className="yui-pill" onClick={onClose}>
@@ -88,21 +173,7 @@ export function RightDetailPanel({ item, onClose }: Props) {
                 </div>
               </div>
 
-              {/* Heat ring */}
-              <div className="mt-4 flex items-center gap-3 border-t border-border pt-3">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  AI熱量
-                </div>
-                <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="yui-bar h-full rounded-full bg-foreground"
-                    style={{ ["--scale" as string]: item.aiHeat / 100, width: "100%" }}
-                  />
-                </div>
-                <div className="tabular-nums text-sm font-semibold">{item.aiHeat}</div>
-              </div>
-
-              <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+              <div className="mt-4 flex items-center gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
                 <span className="tabular-nums">{item.date}</span>
                 <span>·</span>
                 <span className="yui-pill bg-foreground/5 px-2 py-0.5 font-medium text-foreground/70">
@@ -148,11 +219,21 @@ export function RightDetailPanel({ item, onClose }: Props) {
               </ul>
             </Section>
 
-            {/* AI分析 placeholder */}
+            {/* AI分析 */}
             <Section title="AI分析" delay={0.15}>
-              <p className="text-sm text-muted-foreground">
-                熱量スコアの根拠、競合比較、志望動機の素材をここに表示します。
-              </p>
+              {!showAnalysis ? (
+                <div className="flex flex-col items-start gap-2">
+                  <p className="text-sm text-muted-foreground">
+                    「AI分析」ボタンを押すと、会社概要・採用人数・選考フローなどを表示します。
+                  </p>
+                </div>
+              ) : item.companyProfile ? (
+                <CompanyAnalysis profile={item.companyProfile} />
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  この企業の分析データはまだ登録されていません。
+                </p>
+              )}
             </Section>
 
             {/* Wiki placeholder */}

@@ -8,7 +8,7 @@ import { SourceList } from "@/components/timeline/SourceList";
 
 import type { RadarItem } from "../types/radarItem";
 
-export type SortKey = "deadline" | "ai";
+export type SortKey = "deadline";
 
 type Props = {
   items: RadarItem[];
@@ -41,21 +41,6 @@ function daysUntil(dateStr: string): { days: number; label: string } {
   return { days: diff, label: `${Math.abs(diff)}日経過` };
 }
 
-function HeatBar({ value }: { value: number }) {
-  const pct = Math.max(0, Math.min(100, value));
-  return (
-    <div className="flex items-center gap-2">
-      <div className="relative h-1.5 w-20 overflow-hidden rounded-full bg-muted">
-        <div
-          className="yui-bar h-full rounded-full bg-foreground"
-          style={{ ["--scale" as string]: pct / 100, width: "100%" }}
-        />
-      </div>
-      <span className="tabular-nums text-xs font-medium text-foreground/80">{pct}</span>
-    </div>
-  );
-}
-
 export function RadarTable({
   items,
   selectedId,
@@ -66,11 +51,7 @@ export function RadarTable({
 }: Props) {
   const sorted = useMemo(() => {
     const copy = [...items];
-    if (sortKey === "deadline") {
-      copy.sort((a, b) => a.date.localeCompare(b.date));
-    } else {
-      copy.sort((a, b) => b.aiHeat - a.aiHeat);
-    }
+    copy.sort((a, b) => a.date.localeCompare(b.date));
     return copy;
   }, [items, sortKey]);
 
@@ -91,18 +72,6 @@ export function RadarTable({
             )}
           >
             締切順
-          </button>
-          <button
-            type="button"
-            onClick={() => onChangeSort("ai")}
-            className={cn(
-              "yui-pill px-3 py-1 text-xs font-medium transition-colors",
-              sortKey === "ai"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            AI熱量順
           </button>
         </div>
       </div>
@@ -177,13 +146,6 @@ export function RadarTable({
                         {urgent && <span className="yui-dot mr-1 inline-block h-1.5 w-1.5 rounded-full bg-rose-500 align-middle" />}
                         {d.label}
                       </span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                        熱量
-                      </span>
-                      <HeatBar value={row.aiHeat} />
                     </div>
 
                     <div className="ml-auto">
