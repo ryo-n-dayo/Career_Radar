@@ -31,7 +31,11 @@
       "Bash(python3 -c \"import json,sys; data=json.load\\(sys.stdin\\); print\\('\\\\n'.join\\(f['name'] for f in data\\)\\)\")",
       "Bash(curl -s https://raw.githubusercontent.com/yui540/css-animations/main/2026-04-22/tips-1.html)",
       "Bash(curl -s https://raw.githubusercontent.com/yui540/css-animations/main/2026-04-22/tips-3.html)",
-      "Bash(curl -s https://raw.githubusercontent.com/yui540/css-animations/main/2026-04-18/tips-1.html)"
+      "Bash(curl -s https://raw.githubusercontent.com/yui540/css-animations/main/2026-04-18/tips-1.html)",
+      "Bash(open http://localhost:3001)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
