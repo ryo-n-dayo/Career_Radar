@@ -42,6 +42,23 @@ function DashboardContent() {
   const [compareMode, setCompareMode] = useState(false);
   const [compareIds, setCompareIds] = useState<Set<string>>(new Set());
   const [isCompareOpen, setIsCompareOpen] = useState(false);
+  const [savedIds, setSavedIds] = useState<Set<string>>(
+    () => new Set(radarItems.filter((r) => r.saved).map((r) => r.id))
+  );
+
+  const toggleSaved = (id: string) => {
+    setSavedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const itemsWithSaved = useMemo(
+    () => radarItems.map((r) => ({ ...r, saved: savedIds.has(r.id) })),
+    [savedIds]
+  );
 
   const toggleCompare = (id: string) => {
     setCompareIds((prev) => {
@@ -52,7 +69,10 @@ function DashboardContent() {
     });
   };
 
-  const filteredItems = useMemo(() => applyFilters(radarItems, filter), [filter]);
+  const filteredItems = useMemo(
+    () => applyFilters(itemsWithSaved, filter),
+    [itemsWithSaved, filter]
+  );
   const savedFilteredItems = useMemo(
     () => (savedOnly ? filteredItems.filter((item) => item.saved) : filteredItems),
     [filteredItems, savedOnly]
@@ -236,7 +256,12 @@ function DashboardContent() {
           aria-hidden={!isRightOpen}
           style={{ width: isRightOpen ? 420 : 0, overflow: "hidden" }}
         >
-          <RightDetailPanel item={selected} onClose={() => setIsRightOpen(false)} />
+          <RightDetailPanel
+            item={selected}
+            onClose={() => setIsRightOpen(false)}
+            isSaved={selected ? savedIds.has(selected.id) : false}
+            onToggleSaved={toggleSaved}
+          />
         </div>
       </div>
     </div>

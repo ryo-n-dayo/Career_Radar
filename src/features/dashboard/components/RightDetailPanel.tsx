@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -18,7 +16,7 @@ function DataRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function CompanyAnalysis({ profile }: { profile: CompanyProfile }) {
+function CompanyInfo({ profile }: { profile: CompanyProfile }) {
   return (
     <div className="flex flex-col gap-3">
       <p className="text-sm leading-relaxed text-foreground/80">{profile.overview}</p>
@@ -112,6 +110,8 @@ function CompanyAnalysis({ profile }: { profile: CompanyProfile }) {
 type Props = {
   item?: RadarItem;
   onClose: () => void;
+  isSaved: boolean;
+  onToggleSaved: (id: string) => void;
 };
 
 function Section({
@@ -130,7 +130,7 @@ function Section({
     >
       <div className="mb-2 flex items-center gap-2">
         <div className="h-3 w-[3px] rounded-full bg-foreground/60" />
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <h4 className="yui-heading text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {title}
         </h4>
       </div>
@@ -139,13 +139,7 @@ function Section({
   );
 }
 
-export function RightDetailPanel({ item, onClose }: Props) {
-  const [showAnalysis, setShowAnalysis] = useState(false);
-
-  useEffect(() => {
-    setShowAnalysis(false);
-  }, [item?.id]);
-
+export function RightDetailPanel({ item, onClose, isSaved, onToggleSaved }: Props) {
   return (
     <aside className="flex h-full flex-col bg-muted/20">
       <div className="flex items-center gap-2 px-4 py-3">
@@ -153,15 +147,6 @@ export function RightDetailPanel({ item, onClose }: Props) {
         <div className="ml-auto flex items-center gap-1.5">
           <Button variant="outline" size="sm" className="yui-pill" disabled={!item}>
             ESに引用
-          </Button>
-          <Button
-            variant={showAnalysis ? "default" : "secondary"}
-            size="sm"
-            className="yui-pill"
-            disabled={!item}
-            onClick={() => setShowAnalysis((v) => !v)}
-          >
-            AI分析
           </Button>
           <Button variant="ghost" size="sm" className="yui-pill" onClick={onClose}>
             閉じる
@@ -204,6 +189,28 @@ export function RightDetailPanel({ item, onClose }: Props) {
                   <p className="mt-2 text-sm leading-relaxed text-foreground/80">{item.content}</p>
                 </div>
               </div>
+
+              <label
+                className={cn(
+                  "mt-4 flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm transition-colors",
+                  isSaved
+                    ? "border-foreground/40 bg-foreground/5"
+                    : "border-border bg-background hover:border-foreground/20"
+                )}
+              >
+                <input
+                  type="checkbox"
+                  checked={isSaved}
+                  onChange={() => onToggleSaved(item.id)}
+                  className="h-4 w-4 shrink-0 accent-foreground"
+                />
+                <span className="font-medium">お気に入り / 応募予定</span>
+                {isSaved && (
+                  <span className="ml-auto yui-pill bg-foreground text-background px-2 py-0.5 text-[10px] font-medium">
+                    保存中
+                  </span>
+                )}
+              </label>
 
               <div className="mt-4 flex items-center gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
                 <span className="tabular-nums">{item.date}</span>
@@ -251,30 +258,51 @@ export function RightDetailPanel({ item, onClose }: Props) {
               </ul>
             </Section>
 
-            {/* AI分析 */}
-            <Section title="AI分析" delay={0.15}>
-              {!showAnalysis ? (
-                <div className="flex flex-col items-start gap-2">
-                  <p className="text-sm text-muted-foreground">
-                    「AI分析」ボタンを押すと、会社概要・採用人数・選考フローなどを表示します。
-                  </p>
-                </div>
-              ) : item.companyProfile ? (
-                <CompanyAnalysis profile={item.companyProfile} />
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  この企業の分析データはまだ登録されていません。
+            {/* 会社情報 */}
+            {item.companyProfile && (
+              <Section title="会社情報" delay={0.15}>
+                <CompanyInfo profile={item.companyProfile} />
+              </Section>
+            )}
+
+            {/* 求める人物像 */}
+            {item.companyProfile?.idealCandidate && (
+              <Section title="求める人物像" delay={0.18}>
+                <p className="text-sm leading-relaxed text-foreground/85 whitespace-pre-line">
+                  {item.companyProfile.idealCandidate}
                 </p>
-              )}
-            </Section>
+              </Section>
+            )}
+
+            {/* 会社の雰囲気 */}
+            {item.companyProfile?.cultureDescription && (
+              <Section title="会社の雰囲気" delay={0.2}>
+                <p className="text-sm leading-relaxed text-foreground/85 whitespace-pre-line">
+                  {item.companyProfile.cultureDescription}
+                </p>
+                {item.companyProfile.cultureTags &&
+                  item.companyProfile.cultureTags.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {item.companyProfile.cultureTags.map((t) => (
+                        <span
+                          key={t}
+                          className="yui-pill bg-foreground/[0.04] px-2.5 py-0.5 text-xs text-foreground/80"
+                        >
+                          #{t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+              </Section>
+            )}
 
             {/* マイページ認証情報 */}
-            <Section title="マイページ認証情報" delay={0.18}>
+            <Section title="マイページ認証情報" delay={0.22}>
               <CredentialsSection companyId={item.id} companyName={item.companyName} />
             </Section>
 
             {/* Wiki placeholder */}
-            <Section title="Wiki" delay={0.2}>
+            <Section title="Wiki" delay={0.24}>
               <p className="text-sm text-muted-foreground">
                 会社概要、選考メモ、参考リンク、引用候補を蓄積します。
               </p>
@@ -282,7 +310,7 @@ export function RightDetailPanel({ item, onClose }: Props) {
 
             {/* X insights */}
             {item.xInsights && item.xInsights.length > 0 && (
-              <Section title="Xからの社員口コミ" delay={0.25}>
+              <Section title="Xからの社員口コミ" delay={0.28}>
                 <div className="space-y-2">
                   {item.xInsights.map((insight) => (
                     <div
