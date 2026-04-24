@@ -13,8 +13,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body>{children}</body>
+      <body>
+        <div className="yui-blob yui-blob--a" aria-hidden />
+        <div className="yui-blob yui-blob--b" aria-hidden />
+        <div className="yui-load-view" aria-hidden>
+          <span className="yui-load-view__logo">CAREER · RADAR</span>
+        </div>
+        {children}
+      </body>
     </html>
   );
 }
-

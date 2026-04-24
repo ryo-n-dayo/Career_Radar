@@ -45,5 +45,8 @@ export type CompanyProfile = {
   capital?: string;
   mission?: string;
   businessSegments?: string[];
+  idealCandidate?: string;
+  cultureDescription?: string;
+  cultureTags?: string[];
 };
 

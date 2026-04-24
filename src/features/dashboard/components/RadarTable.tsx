@@ -97,6 +97,7 @@ export function RadarTable({
               >
                 <button
                   type="button"
+                  data-selected={isSelected && !compareMode ? "true" : undefined}
                   onClick={() =>
                     compareMode ? onToggleCompare?.(row.id) : onSelect(row.id)
                   }

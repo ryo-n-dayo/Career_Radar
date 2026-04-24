@@ -18,7 +18,11 @@ export default {
           foreground: "hsl(var(--muted-foreground))"
         },
         border: "hsl(var(--border))",
-        ring: "hsl(var(--ring))"
+        ring: "hsl(var(--ring))",
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          soft: "hsl(var(--accent-soft))"
+        }
       }
     }
   },
