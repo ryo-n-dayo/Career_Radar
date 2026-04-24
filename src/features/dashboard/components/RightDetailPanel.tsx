@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
 import type { CompanyProfile, RadarItem } from "../types/radarItem";
+import { CredentialsSection } from "./CredentialsSection";
 
 function DataRow({ label, value }: { label: string; value: string }) {
   return (
@@ -22,14 +23,45 @@ function CompanyAnalysis({ profile }: { profile: CompanyProfile }) {
     <div className="flex flex-col gap-3">
       <p className="text-sm leading-relaxed text-foreground/80">{profile.overview}</p>
 
+      {profile.mission && (
+        <div className="rounded-xl border border-border bg-foreground/[0.02] px-3 py-2">
+          <div className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Mission
+          </div>
+          <p className="text-sm italic leading-relaxed text-foreground/80">{profile.mission}</p>
+        </div>
+      )}
+
       <div className="divide-y divide-border rounded-xl border border-border bg-muted/30 px-3">
         <DataRow label="業種" value={profile.industry} />
+        {profile.ceo && <DataRow label="代表者" value={profile.ceo} />}
         <DataRow label="設立" value={profile.founded} />
         <DataRow label="本社" value={profile.headquarters} />
+        {profile.capital && <DataRow label="資本金" value={profile.capital} />}
         <DataRow label="従業員数" value={profile.employees} />
         {profile.revenue && <DataRow label="売上" value={profile.revenue} />}
+        {profile.listed && (
+          <DataRow
+            label="上場"
+            value={profile.ticker ? `${profile.listed}（${profile.ticker}）` : profile.listed}
+          />
+        )}
         <DataRow label="採用人数" value={profile.hiringCount} />
       </div>
+
+      {profile.businessSegments && profile.businessSegments.length > 0 && (
+        <div>
+          <div className="mb-1.5 text-xs text-muted-foreground">事業内容</div>
+          <ul className="space-y-1 text-sm text-foreground/85">
+            {profile.businessSegments.map((seg) => (
+              <li key={seg} className="flex gap-2">
+                <span className="mt-1.5 inline-block h-1 w-1 shrink-0 rounded-full bg-foreground/40" />
+                <span>{seg}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div>
         <div className="mb-1.5 text-xs text-muted-foreground">募集職種</div>
@@ -234,6 +266,11 @@ export function RightDetailPanel({ item, onClose }: Props) {
                   この企業の分析データはまだ登録されていません。
                 </p>
               )}
+            </Section>
+
+            {/* マイページ認証情報 */}
+            <Section title="マイページ認証情報" delay={0.18}>
+              <CredentialsSection companyId={item.id} companyName={item.companyName} />
             </Section>
 
             {/* Wiki placeholder */}

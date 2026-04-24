@@ -9,6 +9,7 @@ import { applyFilters } from "@/lib/filters";
 import { Calendar } from "@/components/ui/calendar";
 
 import { radarItems } from "../mock/radarItems";
+import { CompareDialog } from "./CompareDialog";
 import { LeftNav } from "./LeftNav";
 import { NewItemsBanner } from "./NewItemsBanner";
 import { RadarTable, type SortKey } from "./RadarTable";
@@ -38,6 +39,18 @@ function DashboardContent() {
   const [isRightOpen, setIsRightOpen] = useState(true);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareIds, setCompareIds] = useState<Set<string>>(new Set());
+  const [isCompareOpen, setIsCompareOpen] = useState(false);
+
+  const toggleCompare = (id: string) => {
+    setCompareIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const filteredItems = useMemo(() => applyFilters(radarItems, filter), [filter]);
   const savedFilteredItems = useMemo(
@@ -55,26 +68,27 @@ function DashboardContent() {
         const mockEvents: CalendarEvent[] = [
           {
             id: "cal_1",
-            title: "面接: 株式会社サンプルテック",
+            title: "説明会: note株式会社",
             startTime: new Date("2026-04-25T10:00:00"),
             endTime: new Date("2026-04-25T11:00:00"),
             location: "オンライン",
-            companyId: "r1"
+            companyId: "r3"
           },
           {
             id: "cal_2",
-            title: "説明会: Example Consulting",
+            title: "早期選考: アクセンチュア株式会社",
             startTime: new Date("2026-04-28T14:00:00"),
             endTime: new Date("2026-04-28T16:00:00"),
-            location: "東京オフィス",
+            location: "赤坂インターシティAIR",
             companyId: "r2"
           },
           {
             id: "cal_3",
-            title: "オフライン説明会: Green Mobility",
+            title: "説明会: 株式会社ディー・エヌ・エー",
             startTime: new Date("2026-04-30T13:00:00"),
             endTime: new Date("2026-04-30T15:00:00"),
-            location: "渋谷"
+            location: "渋谷",
+            companyId: "r5"
           }
         ];
         setCalendarEvents(mockEvents);
@@ -118,6 +132,28 @@ function DashboardContent() {
               </div>
 
               <div className="flex items-center gap-2 ml-auto">
+                <Button
+                  size="sm"
+                  variant={compareMode ? "default" : "outline"}
+                  onClick={() => {
+                    setCompareMode((v) => {
+                      if (v) setCompareIds(new Set());
+                      return !v;
+                    });
+                  }}
+                >
+                  {compareMode ? `比較選択中 (${compareIds.size})` : "比較モード"}
+                </Button>
+                {compareMode && (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    disabled={compareIds.size < 2}
+                    onClick={() => setIsCompareOpen(true)}
+                  >
+                    比較を表示
+                  </Button>
+                )}
                 <Button
                   size="sm"
                   variant={savedOnly ? "secondary" : "ghost"}
@@ -184,6 +220,9 @@ function DashboardContent() {
                       sortKey={sortKey}
                       onChangeSort={setSortKey}
                       onResetFilter={resetFilter}
+                      compareMode={compareMode}
+                      compareSelected={compareIds}
+                      onToggleCompare={toggleCompare}
                     />
                   </>
                 )}

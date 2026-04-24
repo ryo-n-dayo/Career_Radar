@@ -17,6 +17,9 @@ type Props = {
   sortKey: SortKey;
   onChangeSort: (key: SortKey) => void;
   onResetFilter: () => void;
+  compareMode?: boolean;
+  compareSelected?: Set<string>;
+  onToggleCompare?: (id: string) => void;
 };
 
 function deadlineAccent(label: RadarItem["deadlineLabel"]) {
@@ -47,7 +50,10 @@ export function RadarTable({
   onSelect,
   sortKey,
   onChangeSort,
-  onResetFilter
+  onResetFilter,
+  compareMode = false,
+  compareSelected,
+  onToggleCompare
 }: Props) {
   const sorted = useMemo(() => {
     const copy = [...items];
@@ -82,6 +88,7 @@ export function RadarTable({
             const d = daysUntil(row.date);
             const urgent = d.days >= 0 && d.days <= 7;
             const isSelected = row.id === selectedId;
+            const isChecked = compareSelected?.has(row.id) ?? false;
             return (
               <li
                 key={row.id}
@@ -90,16 +97,33 @@ export function RadarTable({
               >
                 <button
                   type="button"
-                  onClick={() => onSelect(row.id)}
+                  onClick={() =>
+                    compareMode ? onToggleCompare?.(row.id) : onSelect(row.id)
+                  }
                   className={cn(
                     "yui-card block w-full rounded-2xl border bg-background px-4 py-3 text-left",
-                    isSelected
-                      ? "border-foreground/40 shadow-sm"
-                      : "border-border hover:border-foreground/20"
+                    compareMode && isChecked
+                      ? "border-foreground/60 shadow-sm ring-1 ring-foreground/30"
+                      : isSelected && !compareMode
+                        ? "border-foreground/40 shadow-sm"
+                        : "border-border hover:border-foreground/20"
                   )}
                 >
                   {/* Row 1: company name + trust + category */}
                   <div className="flex items-baseline gap-2">
+                    {compareMode && (
+                      <span
+                        aria-hidden
+                        className={cn(
+                          "mr-1 mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center self-center rounded-[4px] border text-[10px]",
+                          isChecked
+                            ? "border-foreground bg-foreground text-background"
+                            : "border-border bg-background"
+                        )}
+                      >
+                        {isChecked ? "✓" : ""}
+                      </span>
+                    )}
                     <h3 className="truncate text-base font-semibold tracking-tight">
                       {row.companyName}
                     </h3>

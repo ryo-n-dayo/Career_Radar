@@ -39,5 +39,11 @@ export type CompanyProfile = {
   hiringRoles: string[];
   selectionFlow?: string[];
   website?: string;
+  ceo?: string;
+  listed?: string;
+  ticker?: string;
+  capital?: string;
+  mission?: string;
+  businessSegments?: string[];
 };
 
