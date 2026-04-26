@@ -1,0 +1,42 @@
+-- CreateTable
+CREATE TABLE "EventParticipant" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "eventId" TEXT NOT NULL,
+    "companyId" TEXT NOT NULL,
+    "role" TEXT NOT NULL DEFAULT '参加',
+    CONSTRAINT "EventParticipant_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "EventParticipant_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "Company" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- RedefineTables
+PRAGMA defer_foreign_keys=ON;
+PRAGMA foreign_keys=OFF;
+CREATE TABLE "new_Event" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "userId" TEXT NOT NULL,
+    "companyId" TEXT,
+    "category" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "content" TEXT,
+    "startsAt" DATETIME,
+    "endsAt" DATETIME,
+    "deadline" DATETIME,
+    "status" TEXT NOT NULL DEFAULT 'TODO',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "Event_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "Event_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "Company" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+);
+INSERT INTO "new_Event" ("category", "companyId", "content", "createdAt", "deadline", "endsAt", "id", "startsAt", "status", "title", "updatedAt", "userId") SELECT "category", "companyId", "content", "createdAt", "deadline", "endsAt", "id", "startsAt", "status", "title", "updatedAt", "userId" FROM "Event";
+DROP TABLE "Event";
+ALTER TABLE "new_Event" RENAME TO "Event";
+CREATE INDEX "Event_companyId_deadline_idx" ON "Event"("companyId", "deadline");
+CREATE INDEX "Event_userId_status_idx" ON "Event"("userId", "status");
+PRAGMA foreign_keys=ON;
+PRAGMA defer_foreign_keys=OFF;
+
+-- CreateIndex
+CREATE INDEX "EventParticipant_eventId_idx" ON "EventParticipant"("eventId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "EventParticipant_eventId_companyId_key" ON "EventParticipant"("eventId", "companyId");
