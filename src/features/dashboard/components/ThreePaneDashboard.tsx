@@ -14,11 +14,12 @@ import { LeftNav } from "./LeftNav";
 import { NewItemsBanner } from "./NewItemsBanner";
 import { RadarTable, type SortKey } from "./RadarTable";
 import { RightDetailPanel } from "./RightDetailPanel";
+import { NewsPanel } from "@/features/news/NewsPanel";
 
-const GRID_OPEN = "240px minmax(0, 1fr) 420px";
+const GRID_OPEN = "240px minmax(0, 1fr) 600px";
 const GRID_CLOSED = "240px minmax(0, 1fr) 0px";
 
-type ViewMode = "db" | "calendar";
+type ViewMode = "db" | "calendar" | "news";
 
 interface CalendarEvent {
   id: string;
@@ -33,6 +34,16 @@ function DashboardContent() {
   const { filter, updateFilter, resetFilter, isFiltered } = useFilterState();
 
   const [viewMode, setViewMode] = useState<ViewMode>("db");
+  const [newsUnread, setNewsUnread] = useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/news/list?limit=1", { signal: controller.signal })
+      .then((r) => r.json())
+      .then((d: { unreadCount: number }) => setNewsUnread(d.unreadCount ?? 0))
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
   const [savedOnly, setSavedOnly] = useState(false);
   const [selectedId, setSelectedId] = useState<string | undefined>(radarItems[0]?.id);
   const [sortKey, setSortKey] = useState<SortKey>("deadline");
@@ -121,34 +132,28 @@ function DashboardContent() {
   }, []);
 
   return (
-    <div className="h-screen bg-background">
+    <div className="h-screen overflow-hidden bg-background">
       <div
         className="grid h-full"
         style={{ gridTemplateColumns: isRightOpen ? GRID_OPEN : GRID_CLOSED }}
       >
         <div className="border-r border-border">
-          <LeftNav />
+          <LeftNav
+            viewMode={viewMode}
+            onChangeView={setViewMode}
+            newsUnread={newsUnread}
+          />
         </div>
 
-        <div className="min-w-0">
+        <div className="flex min-h-0 min-w-0 flex-col overflow-hidden">
           <div className="flex h-full flex-col">
             <NewItemsBanner userId={process.env.NEXT_PUBLIC_DEMO_USER_ID} />
             <div className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-3">
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant={viewMode === "db" ? "secondary" : "ghost"}
-                  onClick={() => setViewMode("db")}
-                >
-                  メインDB
-                </Button>
-                <Button
-                  size="sm"
-                  variant={viewMode === "calendar" ? "secondary" : "ghost"}
-                  onClick={() => setViewMode("calendar")}
-                >
-                  カレンダー
-                </Button>
+              {/* 現在の view ラベル */}
+              <div className="text-sm font-semibold tracking-tight text-foreground">
+                {viewMode === "db" && "メインDB"}
+                {viewMode === "calendar" && "カレンダー"}
+                {viewMode === "news" && "📰 今日のニュース"}
               </div>
 
               <div className="flex items-center gap-2 ml-auto">
@@ -198,8 +203,8 @@ function DashboardContent() {
               </div>
             </div>
 
-            <div className="flex h-full min-w-0">
-              <div className="flex-1 min-w-0 p-4">
+            <div className="flex flex-1 min-h-0 overflow-hidden min-w-0">
+              <div className="flex flex-col flex-1 min-h-0 overflow-hidden min-w-0 p-4">
                 {viewMode === "calendar" ? (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between gap-2">
@@ -214,6 +219,8 @@ function DashboardContent() {
                       onDateSelect={setSelectedDate}
                     />
                   </div>
+                ) : viewMode === "news" ? (
+                  <NewsPanel />
                 ) : (
                   <>
                     <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -253,8 +260,8 @@ function DashboardContent() {
 
         <div
           className="border-l border-border"
-          aria-hidden={!isRightOpen}
-          style={{ width: isRightOpen ? 420 : 0, overflow: "hidden" }}
+          aria-hidden={!isRightOpen || viewMode === "news"}
+          style={{ width: (isRightOpen && viewMode !== "news") ? 600 : 0, overflow: "hidden" }}
         >
           <RightDetailPanel
             item={selected}

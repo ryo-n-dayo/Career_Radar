@@ -1,11 +1,63 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
 import type { CompanyProfile, RadarItem } from "../types/radarItem";
 import { CredentialsSection } from "./CredentialsSection";
+
+function DeadlineRing({ date }: { date: string }) {
+  const size = 72;
+  const target = new Date(date);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  target.setHours(0, 0, 0, 0);
+  const diff = Math.round((target.getTime() - today.getTime()) / 86400000);
+  const max = 30;
+  const clamped = Math.max(0, Math.min(diff, max));
+  const pct = 1 - clamped / max;
+  const r = (size - 8) / 2;
+  const c = 2 * Math.PI * r;
+  const dash = c * pct;
+  const urgent = diff <= 3;
+  const stroke = urgent ? "hsl(0 70% 55%)" : "hsl(var(--accent))";
+  const label = diff === 0 ? "本日" : diff > 0 ? `あと${diff}日` : `${Math.abs(diff)}日経過`;
+
+  return (
+    <div className="flex items-center gap-3">
+      <div className="relative" style={{ width: size, height: size }}>
+        <svg width={size} height={size} className="-rotate-90">
+          <circle cx={size / 2} cy={size / 2} r={r} stroke="hsl(var(--muted))" strokeWidth={4} fill="none" />
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={r}
+            stroke={stroke}
+            strokeWidth={4}
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray={`${dash} ${c}`}
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center leading-none">
+          <span className="text-[9px] text-muted-foreground">締切まで</span>
+          <span className="mt-0.5 text-lg font-bold tabular-nums" style={{ color: stroke }}>
+            {Math.max(0, diff)}
+          </span>
+          <span className="text-[9px] text-muted-foreground">日</span>
+        </div>
+      </div>
+      <div>
+        <div className="text-[10px] text-muted-foreground">締切まで</div>
+        <div className="text-base font-bold" style={{ color: stroke }}>{label}</div>
+        <div className="mt-0.5 text-[11px] tabular-nums text-muted-foreground">{date}</div>
+      </div>
+    </div>
+  );
+}
 
 function DataRow({ label, value }: { label: string; value: string }) {
   return (
@@ -140,6 +192,12 @@ function Section({
 }
 
 export function RightDetailPanel({ item, onClose, isSaved, onToggleSaved }: Props) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [item?.id]);
+
   return (
     <aside className="flex h-full flex-col bg-muted/20">
       <div className="flex items-center gap-2 px-4 py-3">
@@ -156,7 +214,7 @@ export function RightDetailPanel({ item, onClose, isSaved, onToggleSaved }: Prop
 
       <Separator />
 
-      <div className="min-h-0 flex-1 overflow-auto p-4">
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-auto p-4">
         {!item ? (
           <div className="rounded-2xl border border-dashed border-border bg-background/40 p-6 text-center text-sm text-muted-foreground">
             左のカードから選択してください
@@ -165,10 +223,16 @@ export function RightDetailPanel({ item, onClose, isSaved, onToggleSaved }: Prop
           <div className="flex flex-col gap-3">
             {/* Hero */}
             <div
-              className="yui-row rounded-2xl border border-border bg-background p-5"
+              className="yui-row rounded-2xl border border-border bg-background p-4"
               style={{ ["--yui-delay" as string]: "0s" }}
             >
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className={cn(
+                  "grid h-11 w-11 shrink-0 place-items-center rounded-xl text-base font-bold",
+                  "bg-orange-100 text-orange-700"
+                )}>
+                  {item.companyName.charAt(0)}
+                </div>
                 <div className="min-w-0 flex-1">
                   <div className="mb-1 flex flex-wrap items-center gap-1.5">
                     <span className="yui-pill bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
@@ -182,42 +246,30 @@ export function RightDetailPanel({ item, onClose, isSaved, onToggleSaved }: Prop
                           : "bg-amber-100/60 text-amber-800 dark:bg-amber-950/40 dark:text-amber-200"
                       )}
                     >
-                      {item.trust === "official" ? "公式認証" : "要確認"}
+                      {item.trust === "official" ? "公式確認" : "要確認"}
                     </span>
                   </div>
-                  <h2 className="text-xl font-semibold tracking-tight">{item.companyName}</h2>
-                  <p className="mt-2 text-sm leading-relaxed text-foreground/80">{item.content}</p>
+                  <h2 className="text-lg font-semibold tracking-tight">{item.companyName}</h2>
+                  <p className="mt-1 text-sm leading-relaxed text-foreground/70">{item.content}</p>
                 </div>
               </div>
 
-              <label
-                className={cn(
-                  "mt-4 flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm transition-colors",
-                  isSaved
-                    ? "border-foreground/40 bg-foreground/5"
-                    : "border-border bg-background hover:border-foreground/20"
-                )}
-              >
-                <input
-                  type="checkbox"
-                  checked={isSaved}
-                  onChange={() => onToggleSaved(item.id)}
-                  className="h-4 w-4 shrink-0 accent-foreground"
-                />
-                <span className="font-medium">お気に入り / 応募予定</span>
-                {isSaved && (
-                  <span className="ml-auto yui-pill bg-foreground text-background px-2 py-0.5 text-[10px] font-medium">
-                    保存中
-                  </span>
-                )}
-              </label>
-
-              <div className="mt-4 flex items-center gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
-                <span className="tabular-nums">{item.date}</span>
-                <span>·</span>
-                <span className="yui-pill bg-foreground/5 px-2 py-0.5 font-medium text-foreground/70">
-                  {item.deadlineLabel}
-                </span>
+              {/* Deadline hero row: big ring + save button */}
+              <div className="mt-4 flex items-center gap-3">
+                <DeadlineRing date={item.date} />
+                <button
+                  type="button"
+                  onClick={() => onToggleSaved(item.id)}
+                  className={cn(
+                    "ml-auto inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-medium shadow-sm transition",
+                    isSaved
+                      ? "bg-[hsl(var(--accent))] text-white hover:bg-[hsl(var(--accent))]/90"
+                      : "border border-border bg-background text-foreground hover:border-[hsl(var(--accent))]/50"
+                  )}
+                >
+                  <span>{isSaved ? "★" : "☆"}</span>
+                  <span>{isSaved ? "保存済み" : "保存する"}</span>
+                </button>
               </div>
             </div>
 
@@ -301,12 +353,6 @@ export function RightDetailPanel({ item, onClose, isSaved, onToggleSaved }: Prop
               <CredentialsSection companyId={item.id} companyName={item.companyName} />
             </Section>
 
-            {/* Wiki placeholder */}
-            <Section title="Wiki" delay={0.24}>
-              <p className="text-sm text-muted-foreground">
-                会社概要、選考メモ、参考リンク、引用候補を蓄積します。
-              </p>
-            </Section>
 
             {/* X insights */}
             {item.xInsights && item.xInsights.length > 0 && (
