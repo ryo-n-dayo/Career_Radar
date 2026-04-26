@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
-import type { CompanyProfile, RadarItem } from "../types/radarItem";
+import type { CompanyProfile, JointParticipant, RadarItem } from "../types/radarItem";
 import { CredentialsSection } from "./CredentialsSection";
 
 function DeadlineRing({ date }: { date: string }) {
@@ -64,6 +64,26 @@ function DataRow({ label, value }: { label: string; value: string }) {
     <div className="flex items-start gap-3 py-1.5 text-sm">
       <div className="w-20 shrink-0 text-xs text-muted-foreground">{label}</div>
       <div className="min-w-0 flex-1 text-foreground/90">{value}</div>
+    </div>
+  );
+}
+
+const ROLE_STYLE: Record<string, string> = {
+  "主催": "bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300",
+  "協賛": "bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300",
+  "参加": "bg-muted text-muted-foreground",
+};
+
+function ParticipantRow({ participant }: { participant: JointParticipant }) {
+  return (
+    <div className="flex items-center gap-2.5 rounded-xl border border-border bg-background px-3 py-2">
+      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-muted text-sm font-bold text-muted-foreground">
+        {participant.companyName.charAt(0)}
+      </div>
+      <span className="flex-1 truncate text-sm font-medium">{participant.companyName}</span>
+      <span className={cn("yui-pill px-2 py-0.5 text-[10px] font-semibold", ROLE_STYLE[participant.role] ?? ROLE_STYLE["参加"])}>
+        {participant.role}
+      </span>
     </div>
   );
 }
@@ -164,6 +184,10 @@ type Props = {
   onClose: () => void;
   isSaved: boolean;
   onToggleSaved: (id: string) => void;
+  isCalendarAdded?: boolean;
+  calendarEventLink?: string;
+  isAddingToCalendar?: boolean;
+  onAddToCalendar?: (item: RadarItem) => void;
 };
 
 function Section({
@@ -191,7 +215,16 @@ function Section({
   );
 }
 
-export function RightDetailPanel({ item, onClose, isSaved, onToggleSaved }: Props) {
+export function RightDetailPanel({
+  item,
+  onClose,
+  isSaved,
+  onToggleSaved,
+  isCalendarAdded = false,
+  calendarEventLink,
+  isAddingToCalendar = false,
+  onAddToCalendar,
+}: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -229,9 +262,11 @@ export function RightDetailPanel({ item, onClose, isSaved, onToggleSaved }: Prop
               <div className="flex items-start gap-3">
                 <div className={cn(
                   "grid h-11 w-11 shrink-0 place-items-center rounded-xl text-base font-bold",
-                  "bg-orange-100 text-orange-700"
+                  item.isJoint
+                    ? "bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300"
+                    : "bg-orange-100 text-orange-700"
                 )}>
-                  {item.companyName.charAt(0)}
+                  {item.isJoint ? "複" : item.companyName.charAt(0)}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="mb-1 flex flex-wrap items-center gap-1.5">
@@ -254,14 +289,48 @@ export function RightDetailPanel({ item, onClose, isSaved, onToggleSaved }: Prop
                 </div>
               </div>
 
-              {/* Deadline hero row: big ring + save button */}
-              <div className="mt-4 flex items-center gap-3">
+              {/* Deadline hero row: big ring + calendar button + save button */}
+              <div className="mt-4 flex items-center gap-2">
                 <DeadlineRing date={item.date} />
-                <button
+
+                <div className="ml-auto flex items-center gap-2">
+                  {/* ── カレンダーに追加 ── */}
+                  <button
+                    type="button"
+                    onClick={() => onAddToCalendar?.(item)}
+                    disabled={isAddingToCalendar || isCalendarAdded}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-medium shadow-sm transition",
+                      isCalendarAdded
+                        ? "border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                        : "border border-border bg-background text-foreground hover:border-[hsl(var(--accent))]/50"
+                    )}
+                  >
+                    <span>
+                      {isAddingToCalendar ? "⌛" : isCalendarAdded ? "✓" : "📅"}
+                    </span>
+                    <span>
+                      {isAddingToCalendar ? "追加中…" : isCalendarAdded ? "追加済み" : "カレンダー"}
+                    </span>
+                  </button>
+                  {/* 追加済みなら Google Calendar へのリンク */}
+                  {isCalendarAdded && calendarEventLink && (
+                    <a
+                      href={calendarEventLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-[hsl(var(--accent))] underline underline-offset-2 hover:opacity-80"
+                    >
+                      開く↗
+                    </a>
+                  )}
+
+                  {/* ── 保存ボタン ── */}
+                  <button
                   type="button"
                   onClick={() => onToggleSaved(item.id)}
                   className={cn(
-                    "ml-auto inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-medium shadow-sm transition",
+                    "inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-medium shadow-sm transition",
                     isSaved
                       ? "bg-[hsl(var(--accent))] text-white hover:bg-[hsl(var(--accent))]/90"
                       : "border border-border bg-background text-foreground hover:border-[hsl(var(--accent))]/50"
@@ -270,8 +339,9 @@ export function RightDetailPanel({ item, onClose, isSaved, onToggleSaved }: Prop
                   <span>{isSaved ? "★" : "☆"}</span>
                   <span>{isSaved ? "保存済み" : "保存する"}</span>
                 </button>
-              </div>
-            </div>
+                </div>{/* end ml-auto */}
+              </div>{/* end mt-4 row */}
+            </div>{/* end hero card */}
 
             {/* Keywords */}
             {item.keywords.length > 0 && (
@@ -310,15 +380,40 @@ export function RightDetailPanel({ item, onClose, isSaved, onToggleSaved }: Prop
               </ul>
             </Section>
 
-            {/* 会社情報 */}
-            {item.companyProfile && (
-              <Section title="会社情報" delay={0.15}>
-                <CompanyInfo profile={item.companyProfile} />
+            {/* 参加企業一覧（合同イベントのみ） */}
+            {item.isJoint && item.participants && item.participants.length > 0 && (
+              <Section title="参加企業" delay={0.13}>
+                <div className="flex flex-col gap-2">
+                  {item.participants.map((p) => (
+                    <ParticipantRow key={p.companyName} participant={p} />
+                  ))}
+                </div>
               </Section>
             )}
 
+            {/* 会社情報（単一企業 or 合同の各社プロフィール） */}
+            {item.isJoint && item.participants ? (
+              item.participants
+                .filter((p) => p.companyProfile)
+                .map((p, i) => (
+                  <Section
+                    key={p.companyName}
+                    title={`会社情報 — ${p.companyName}`}
+                    delay={0.15 + i * 0.04}
+                  >
+                    <CompanyInfo profile={p.companyProfile!} />
+                  </Section>
+                ))
+            ) : (
+              item.companyProfile && (
+                <Section title="会社情報" delay={0.15}>
+                  <CompanyInfo profile={item.companyProfile} />
+                </Section>
+              )
+            )}
+
             {/* 求める人物像 */}
-            {item.companyProfile?.idealCandidate && (
+            {!item.isJoint && item.companyProfile?.idealCandidate && (
               <Section title="求める人物像" delay={0.18}>
                 <p className="text-sm leading-relaxed text-foreground/85 whitespace-pre-line">
                   {item.companyProfile.idealCandidate}
@@ -327,7 +422,7 @@ export function RightDetailPanel({ item, onClose, isSaved, onToggleSaved }: Prop
             )}
 
             {/* 会社の雰囲気 */}
-            {item.companyProfile?.cultureDescription && (
+            {!item.isJoint && item.companyProfile?.cultureDescription && (
               <Section title="会社の雰囲気" delay={0.2}>
                 <p className="text-sm leading-relaxed text-foreground/85 whitespace-pre-line">
                   {item.companyProfile.cultureDescription}

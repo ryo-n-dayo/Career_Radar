@@ -11,8 +11,8 @@ export const radarItems: RadarItem[] = [
     aiHeat: 95,
     keywords: ["裁量", "若手抜擢", "メディア"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://www.cyberagent.co.jp/careers/students/", fetchedAt: new Date("2026-04-20") },
-      { type: "X", url: "https://x.com/CyberAgent_PR", fetchedAt: new Date("2026-04-21") }
+      { type: "OFFICIAL_WEB", url: "https://www.cyberagent.co.jp/careers/students/", fetchedAt: new Date("2026-04-26") },
+      { type: "X", url: "https://x.com/CyberAgent_PR", fetchedAt: new Date("2026-04-26") }
     ],
     saved: true,
     xInsights: [
@@ -52,15 +52,15 @@ export const radarItems: RadarItem[] = [
   {
     id: "r2",
     companyName: "アクセンチュア株式会社",
-    category: "早期選考",
+    category: "選考",
     content: "ビジネスコンサルタント職 早期選考エントリー受付",
     date: "2026-04-28",
     deadlineLabel: "早期選考",
     aiHeat: 88,
     keywords: ["戦略", "DX", "グローバル"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://www.accenture.com/jp-ja/careers", fetchedAt: new Date("2026-04-19") },
-      { type: "X", url: "https://x.com/AccentureJapan", fetchedAt: new Date("2026-04-18") }
+      { type: "OFFICIAL_WEB", url: "https://www.accenture.com/jp-ja/careers", fetchedAt: new Date("2026-04-26") },
+      { type: "X", url: "https://x.com/AccentureJapan", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -90,14 +90,14 @@ export const radarItems: RadarItem[] = [
   {
     id: "r3",
     companyName: "note株式会社",
-    category: "セミナー",
-    content: "オンライン会社説明会（エンジニア・デザイナー職）",
-    date: "2026-04-25",
+    category: "説明会",
+    content: "オンライン会社説明会 vol.2（エンジニア・デザイナー職）",
+    date: "2026-05-13",
     deadlineLabel: "説明会",
     aiHeat: 72,
     keywords: ["クリエイター", "メディア", "フルリモート"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://note.jp/n/n0dcc914b81e8", fetchedAt: new Date("2026-04-15") }
+      { type: "OFFICIAL_WEB", url: "https://note.jp/n/n0dcc914b81e8", fetchedAt: new Date("2026-04-26") }
     ],
     xInsights: [
       { author: "現役社員", role: "デザイナー", date: "2026-04-12", message: "「だれもが創作をはじめ、続けられるようにする」ミッションへの共感が強い人が多い。" }
@@ -128,14 +128,14 @@ export const radarItems: RadarItem[] = [
   {
     id: "r4",
     companyName: "株式会社マネーフォワード",
-    category: "本選考",
+    category: "選考",
     content: "総合職・エンジニア職 本選考エントリー開始",
     date: "2026-05-03",
     deadlineLabel: "締切",
     aiHeat: 79,
     keywords: ["FinTech", "SaaS", "成長"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://recruit.moneyforward.com/", fetchedAt: new Date("2026-04-22") }
+      { type: "OFFICIAL_WEB", url: "https://recruit.moneyforward.com/", fetchedAt: new Date("2026-04-26") }
     ],
     saved: true,
     trust: "official",
@@ -172,8 +172,8 @@ export const radarItems: RadarItem[] = [
     aiHeat: 78,
     keywords: ["多事業", "AI", "若手裁量"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://dena.com/jp/recruit/newgrads/", fetchedAt: new Date("2026-04-11") },
-      { type: "X", url: "https://x.com/DeNAOfficial", fetchedAt: new Date("2026-04-12") }
+      { type: "OFFICIAL_WEB", url: "https://dena.com/jp/recruit/newgrads/", fetchedAt: new Date("2026-04-26") },
+      { type: "X", url: "https://x.com/DeNAOfficial", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -211,7 +211,7 @@ export const radarItems: RadarItem[] = [
     keywords: ["ゲーム", "Unity", "クオリティ"],
     sources: [
       { type: "OFFICIAL_WEB", url: "https://www.cygames.co.jp/recruit/", fetchedAt: new Date("2026-04-26") },
-      { type: "X", url: "https://x.com/Cygames_PR", fetchedAt: new Date("2026-04-25") }
+      { type: "X", url: "https://x.com/Cygames_PR", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -238,14 +238,14 @@ export const radarItems: RadarItem[] = [
   {
     id: "r7",
     companyName: "富士通株式会社",
-    category: "セミナー",
+    category: "説明会",
     content: "業界研究セミナー（製造業DX / Uvance）",
     date: "2026-05-01",
     deadlineLabel: "説明会",
     aiHeat: 54,
     keywords: ["DX", "Uvance", "安定"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://www.fujitsu.com/jp/about/careers/newgraduates/", fetchedAt: new Date("2026-04-12") }
+      { type: "OFFICIAL_WEB", url: "https://www.fujitsu.com/jp/about/careers/newgraduates/", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -275,15 +275,15 @@ export const radarItems: RadarItem[] = [
   {
     id: "r8",
     companyName: "株式会社SmartHR",
-    category: "早期選考",
+    category: "選考",
     content: "プロダクト職 早期選考（ポートフォリオ必須）",
     date: "2026-04-27",
     deadlineLabel: "早期選考",
     aiHeat: 91,
     keywords: ["HR Tech", "SaaS", "ユーザー志向"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://hello-world.smarthr.co.jp/", fetchedAt: new Date("2026-04-14") },
-      { type: "X", url: "https://x.com/SmartHR_jp", fetchedAt: new Date("2026-04-16") }
+      { type: "OFFICIAL_WEB", url: "https://hello-world.smarthr.co.jp/", fetchedAt: new Date("2026-04-26") },
+      { type: "X", url: "https://x.com/SmartHR_jp", fetchedAt: new Date("2026-04-26") }
     ],
     saved: true,
     trust: "official",
@@ -318,8 +318,8 @@ export const radarItems: RadarItem[] = [
     aiHeat: 67,
     keywords: ["EdTech", "AI", "個別最適"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://corp.atama.plus/recruit/", fetchedAt: new Date("2026-04-09") },
-      { type: "X", url: "https://x.com/atamaplus", fetchedAt: new Date("2026-04-08") }
+      { type: "OFFICIAL_WEB", url: "https://corp.atama.plus/recruit/", fetchedAt: new Date("2026-04-26") },
+      { type: "X", url: "https://x.com/atamaplus", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -345,14 +345,14 @@ export const radarItems: RadarItem[] = [
   {
     id: "r10",
     companyName: "株式会社ラック",
-    category: "本選考",
+    category: "選考",
     content: "セキュリティエンジニア職 本選考",
     date: "2026-05-06",
     deadlineLabel: "締切",
     aiHeat: 86,
     keywords: ["セキュリティ", "JSOC", "インシデント対応"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://www.lac.co.jp/recruit/", fetchedAt: new Date("2026-04-23") }
+      { type: "OFFICIAL_WEB", url: "https://www.lac.co.jp/recruit/", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -387,8 +387,8 @@ export const radarItems: RadarItem[] = [
     aiHeat: 92,
     keywords: ["Go", "マイクロサービス", "英語公用語"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://careers.mercari.com/jp/", fetchedAt: new Date("2026-04-22") },
-      { type: "X", url: "https://x.com/mercari_jp", fetchedAt: new Date("2026-04-22") }
+      { type: "OFFICIAL_WEB", url: "https://careers.mercari.com/jp/", fetchedAt: new Date("2026-04-26") },
+      { type: "X", url: "https://x.com/mercari_jp", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -417,14 +417,14 @@ export const radarItems: RadarItem[] = [
   {
     id: "r12",
     companyName: "LINEヤフー株式会社",
-    category: "本選考",
+    category: "選考",
     content: "エンジニア職 本選考（新卒採用）",
     date: "2026-06-01",
     deadlineLabel: "締切",
     aiHeat: 90,
     keywords: ["大規模サービス", "検索", "メッセージング"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://www.lycorp.co.jp/ja/recruit/newgraduate/", fetchedAt: new Date("2026-04-20") }
+      { type: "OFFICIAL_WEB", url: "https://www.lycorp.co.jp/ja/recruit/newgraduate/", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -453,14 +453,14 @@ export const radarItems: RadarItem[] = [
   {
     id: "r13",
     companyName: "株式会社リクルート",
-    category: "本選考",
+    category: "選考",
     content: "プロダクト職（エンジニア・データサイエンティスト）本選考",
     date: "2026-05-25",
     deadlineLabel: "締切",
     aiHeat: 84,
     keywords: ["プロダクト", "データ", "スケール"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://www.recruit.co.jp/employment/students/", fetchedAt: new Date("2026-04-21") }
+      { type: "OFFICIAL_WEB", url: "https://www.recruit.co.jp/employment/students/", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -489,14 +489,14 @@ export const radarItems: RadarItem[] = [
   {
     id: "r14",
     companyName: "楽天グループ株式会社",
-    category: "早期選考",
+    category: "選考",
     content: "エンジニア職 早期選考（英語面接あり）",
     date: "2026-05-12",
     deadlineLabel: "早期選考",
     aiHeat: 76,
     keywords: ["ECエコシステム", "英語公用語", "大規模基盤"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://corp.rakuten.co.jp/careers/students/", fetchedAt: new Date("2026-04-22") }
+      { type: "OFFICIAL_WEB", url: "https://corp.rakuten.co.jp/careers/students/", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -532,8 +532,8 @@ export const radarItems: RadarItem[] = [
     aiHeat: 74,
     keywords: ["SaaS", "スモールビジネス", "アクセシビリティ"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://jobs.freee.co.jp/newgrad/", fetchedAt: new Date("2026-04-19") },
-      { type: "X", url: "https://x.com/freee_jp", fetchedAt: new Date("2026-04-19") }
+      { type: "OFFICIAL_WEB", url: "https://jobs.freee.co.jp/newgrad/", fetchedAt: new Date("2026-04-26") },
+      { type: "X", url: "https://x.com/freee_jp", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -563,14 +563,14 @@ export const radarItems: RadarItem[] = [
   {
     id: "r16",
     companyName: "Sansan株式会社",
-    category: "早期選考",
+    category: "選考",
     content: "エンジニア職 早期選考（名刺/契約SaaS）",
     date: "2026-05-18",
     deadlineLabel: "早期選考",
     aiHeat: 73,
     keywords: ["B2B SaaS", "データ", "AI-OCR"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://jp.corp-sansan.com/recruit/newgraduate/", fetchedAt: new Date("2026-04-18") }
+      { type: "OFFICIAL_WEB", url: "https://jp.corp-sansan.com/recruit/newgraduate/", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -606,8 +606,8 @@ export const radarItems: RadarItem[] = [
     aiHeat: 89,
     keywords: ["SaaS", "AI-OCR", "爆速成長"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://jobs.layerx.co.jp/", fetchedAt: new Date("2026-04-22") },
-      { type: "X", url: "https://x.com/LayerX_inc", fetchedAt: new Date("2026-04-22") }
+      { type: "OFFICIAL_WEB", url: "https://jobs.layerx.co.jp/", fetchedAt: new Date("2026-04-26") },
+      { type: "X", url: "https://x.com/LayerX_inc", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -634,14 +634,14 @@ export const radarItems: RadarItem[] = [
   {
     id: "r18",
     companyName: "PayPay株式会社",
-    category: "本選考",
+    category: "選考",
     content: "ソフトウェアエンジニア 本選考エントリー",
     date: "2026-05-30",
     deadlineLabel: "締切",
     aiHeat: 85,
     keywords: ["キャッシュレス", "マイクロサービス", "グローバル"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://about.paypay.ne.jp/career/", fetchedAt: new Date("2026-04-20") }
+      { type: "OFFICIAL_WEB", url: "https://about.paypay.ne.jp/career/", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -668,14 +668,14 @@ export const radarItems: RadarItem[] = [
   {
     id: "r19",
     companyName: "株式会社ZOZO",
-    category: "セミナー",
+    category: "説明会",
     content: "ZOZO Tech Meetup（エンジニア向け）",
     date: "2026-05-15",
     deadlineLabel: "説明会",
     aiHeat: 68,
     keywords: ["EC", "検索/推薦", "計測テック"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://corp.zozo.com/recruit/newgraduate/", fetchedAt: new Date("2026-04-17") }
+      { type: "OFFICIAL_WEB", url: "https://corp.zozo.com/recruit/newgraduate/", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -711,7 +711,7 @@ export const radarItems: RadarItem[] = [
     aiHeat: 70,
     keywords: ["レシピ", "グローバル", "Ruby"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://cookpad-careers.jp/", fetchedAt: new Date("2026-04-18") }
+      { type: "OFFICIAL_WEB", url: "https://cookpad-careers.jp/", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -746,8 +746,8 @@ export const radarItems: RadarItem[] = [
     aiHeat: 75,
     keywords: ["モンスト", "家族アルバム", "ゲーム"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://mixi.co.jp/recruit/newgraduate/", fetchedAt: new Date("2026-04-20") },
-      { type: "X", url: "https://x.com/mixi_pr", fetchedAt: new Date("2026-04-20") }
+      { type: "OFFICIAL_WEB", url: "https://mixi.co.jp/recruit/newgraduate/", fetchedAt: new Date("2026-04-26") },
+      { type: "X", url: "https://x.com/mixi_pr", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -776,14 +776,14 @@ export const radarItems: RadarItem[] = [
   {
     id: "r22",
     companyName: "株式会社NTTデータグループ",
-    category: "本選考",
+    category: "選考",
     content: "総合職（SE/コンサルタント）本選考エントリー",
     date: "2026-05-22",
     deadlineLabel: "締切",
     aiHeat: 65,
     keywords: ["SIer", "社会基盤", "海外M&A"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://nttdata-recruit.com/", fetchedAt: new Date("2026-04-21") }
+      { type: "OFFICIAL_WEB", url: "https://nttdata-recruit.com/", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -820,8 +820,8 @@ export const radarItems: RadarItem[] = [
     aiHeat: 71,
     keywords: ["ホスティング", "minne", "SUZURI"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://recruit.pepabo.com/", fetchedAt: new Date("2026-04-16") },
-      { type: "X", url: "https://x.com/pepabo", fetchedAt: new Date("2026-04-16") }
+      { type: "OFFICIAL_WEB", url: "https://recruit.pepabo.com/", fetchedAt: new Date("2026-04-26") },
+      { type: "X", url: "https://x.com/pepabo", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -849,14 +849,14 @@ export const radarItems: RadarItem[] = [
   {
     id: "r24",
     companyName: "株式会社はてな",
-    category: "早期選考",
+    category: "選考",
     content: "Webアプリケーションエンジニア 早期選考",
     date: "2026-05-19",
     deadlineLabel: "早期選考",
     aiHeat: 80,
     keywords: ["Perl/Scala", "マンガビューワ", "Mackerel"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://hatenacorp.jp/recruit/newgraduate/", fetchedAt: new Date("2026-04-17") }
+      { type: "OFFICIAL_WEB", url: "https://hatenacorp.jp/recruit/newgraduate/", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -890,7 +890,7 @@ export const radarItems: RadarItem[] = [
     aiHeat: 77,
     keywords: ["kintone", "リモート", "多様性"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://cybozu.co.jp/recruit/entry/new-graduate/", fetchedAt: new Date("2026-04-19") }
+      { type: "OFFICIAL_WEB", url: "https://cybozu.co.jp/recruit/entry/new-graduate/", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -919,14 +919,14 @@ export const radarItems: RadarItem[] = [
   {
     id: "r26",
     companyName: "面白法人カヤック",
-    category: "セミナー",
+    category: "説明会",
     content: "エンジニア向けオープンセッション（鎌倉から世界へ）",
     date: "2026-05-09",
     deadlineLabel: "説明会",
     aiHeat: 62,
     keywords: ["ゲーム", "地域活性化", "ユニーク"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://www.kayac.com/recruit/fresh", fetchedAt: new Date("2026-04-15") }
+      { type: "OFFICIAL_WEB", url: "https://www.kayac.com/recruit/fresh", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -955,14 +955,14 @@ export const radarItems: RadarItem[] = [
   {
     id: "r27",
     companyName: "クラスメソッド株式会社",
-    category: "本選考",
+    category: "選考",
     content: "AWSエンジニア 本選考エントリー",
     date: "2026-06-02",
     deadlineLabel: "締切",
     aiHeat: 82,
     keywords: ["AWS", "DevelopersIO", "技術発信"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://classmethod.jp/recruit/new-graduate/", fetchedAt: new Date("2026-04-18") }
+      { type: "OFFICIAL_WEB", url: "https://classmethod.jp/recruit/new-graduate/", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -996,7 +996,7 @@ export const radarItems: RadarItem[] = [
     aiHeat: 64,
     keywords: ["内製化支援", "自律", "給与自己決定"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://hrmos.co/pages/yumemi", fetchedAt: new Date("2026-04-14") }
+      { type: "OFFICIAL_WEB", url: "https://hrmos.co/pages/yumemi", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -1030,8 +1030,8 @@ export const radarItems: RadarItem[] = [
     aiHeat: 69,
     keywords: ["ライブ配信", "アバター", "スマホゲーム"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://www.mirrativ.co.jp/recruit", fetchedAt: new Date("2026-04-19") },
-      { type: "X", url: "https://x.com/mirrativ_jp", fetchedAt: new Date("2026-04-19") }
+      { type: "OFFICIAL_WEB", url: "https://www.mirrativ.co.jp/recruit", fetchedAt: new Date("2026-04-26") },
+      { type: "X", url: "https://x.com/mirrativ_jp", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -1058,14 +1058,14 @@ export const radarItems: RadarItem[] = [
   {
     id: "r30",
     companyName: "株式会社マネーフォワードケッサイ",
-    category: "早期選考",
+    category: "選考",
     content: "バックエンドエンジニア（Go/Rails）早期選考",
     date: "2026-05-27",
     deadlineLabel: "早期選考",
     aiHeat: 72,
     keywords: ["BtoB", "決済", "与信"],
     sources: [
-      { type: "OFFICIAL_WEB", url: "https://mfkessai.co.jp/recruit", fetchedAt: new Date("2026-04-20") }
+      { type: "OFFICIAL_WEB", url: "https://mfkessai.co.jp/recruit", fetchedAt: new Date("2026-04-26") }
     ],
     trust: "official",
     companyProfile: {
@@ -1087,6 +1087,139 @@ export const radarItems: RadarItem[] = [
       selectionFlow: ["書類選考", "コーディング課題", "面接(複数回)", "最終面接"],
       website: "https://mfkessai.co.jp"
     }
+  },
+  {
+    id: "r-joint-1",
+    companyName: "Tech Career Fair 2026",
+    category: "説明会",
+    content: "ITメガベンチャー合同説明会 — エンジニア・デザイナー・ビジネス職向け",
+    date: "2026-05-20",
+    deadlineLabel: "説明会",
+    aiHeat: 82,
+    keywords: ["合同説明会", "エンジニア採用", "新卒"],
+    sources: [
+      { type: "OFFICIAL_WEB", url: "https://example.com/techfair2026", fetchedAt: new Date("2026-04-26") }
+    ],
+    trust: "official",
+    isJoint: true,
+    participants: [
+      {
+        companyName: "株式会社サイバーエージェント",
+        role: "主催",
+        companyProfile: {
+          overview: "ABEMA・ゲーム・インターネット広告を展開するメガベンチャー。",
+          industry: "インターネット / メディア / 広告",
+          founded: "1998年3月",
+          headquarters: "東京都渋谷区",
+          employees: "連結 約7,400名",
+          hiringCount: "新卒100名以上",
+          hiringRoles: ["エンジニア", "ビジネス", "デザイナー"],
+          website: "https://www.cyberagent.co.jp",
+          mission: "新しい力とインターネットで日本の閉塞感を打破する"
+        }
+      },
+      {
+        companyName: "株式会社メルカリ",
+        role: "参加",
+        companyProfile: {
+          overview: "フリマアプリ「メルカリ」を運営。USにも展開するグローバルスタートアップ。",
+          industry: "EC / フィンテック",
+          founded: "2013年2月",
+          headquarters: "東京都港区",
+          employees: "連結 約2,300名",
+          hiringCount: "新卒20〜30名",
+          hiringRoles: ["エンジニア", "デザイナー"],
+          website: "https://about.mercari.com"
+        }
+      },
+      {
+        companyName: "株式会社ミクシィ",
+        role: "参加",
+        companyProfile: {
+          overview: "モンスターストライク・スポーツ・ライフスタイル事業を展開。",
+          industry: "エンターテインメント / スポーツ",
+          founded: "1999年6月",
+          headquarters: "東京都渋谷区",
+          employees: "連結 約2,000名",
+          hiringCount: "新卒30名程度",
+          hiringRoles: ["エンジニア", "プランナー"],
+          website: "https://mixi.co.jp"
+        }
+      },
+      {
+        companyName: "freee株式会社",
+        role: "参加",
+        companyProfile: {
+          overview: "クラウド会計・人事労務ソフトでSMB支援。ミッションドリブンなSaaS企業。",
+          industry: "SaaS / フィンテック",
+          founded: "2012年7月",
+          headquarters: "東京都品川区",
+          employees: "約1,800名",
+          hiringCount: "新卒若干名",
+          hiringRoles: ["エンジニア", "カスタマーサクセス"],
+          website: "https://www.freee.co.jp"
+        }
+      }
+    ]
+  },
+  {
+    id: "r-joint-2",
+    companyName: "2026卒 金融×IT 合同セミナー",
+    category: "説明会",
+    content: "フィンテック・金融DXを推進する企業による合同セミナー。業界研究・座談会あり",
+    date: "2026-05-08",
+    deadlineLabel: "締切",
+    aiHeat: 74,
+    keywords: ["フィンテック", "金融DX", "合同セミナー"],
+    sources: [
+      { type: "OFFICIAL_WEB", url: "https://example.com/fintechseminar", fetchedAt: new Date("2026-04-26") }
+    ],
+    trust: "needs_review",
+    isJoint: true,
+    participants: [
+      {
+        companyName: "マネーフォワード株式会社",
+        role: "主催",
+        companyProfile: {
+          overview: "家計・法人向けクラウドサービスを提供するフィンテック企業。",
+          industry: "フィンテック / SaaS",
+          founded: "2012年5月",
+          headquarters: "東京都港区",
+          employees: "連結 約2,600名",
+          hiringCount: "新卒20〜30名",
+          hiringRoles: ["エンジニア", "ビジネス"],
+          website: "https://moneyforward.com"
+        }
+      },
+      {
+        companyName: "株式会社SBI新生銀行",
+        role: "協賛",
+        companyProfile: {
+          overview: "SBIグループの銀行。デジタルバンキングに注力。",
+          industry: "銀行 / 金融",
+          founded: "1952年",
+          headquarters: "東京都中央区",
+          employees: "約2,400名",
+          hiringCount: "新卒若干名",
+          hiringRoles: ["総合職", "ITエンジニア"],
+          website: "https://www.sbishinseibank.co.jp"
+        }
+      },
+      {
+        companyName: "Kyash株式会社",
+        role: "参加",
+        companyProfile: {
+          overview: "送金・決済アプリ「Kyash」を運営するスタートアップ。",
+          industry: "フィンテック",
+          founded: "2015年8月",
+          headquarters: "東京都港区",
+          employees: "約200名",
+          hiringCount: "新卒若干名",
+          hiringRoles: ["エンジニア", "プロダクト"],
+          website: "https://kyash.co"
+        }
+      }
+    ]
   }
 ];
 

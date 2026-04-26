@@ -165,6 +165,12 @@ export function LeftNav({ viewMode, onChangeView, newsUnread = 0 }: Props) {
           <span>{isDark ? "ダーク" : "ライト"}</span>
         </Button>
       </div>
+
+      {/* Legal */}
+      <div className="mt-auto flex gap-3 px-1 text-[11px] text-muted-foreground">
+        <a href="/privacy" className="hover:text-foreground transition-colors">プライバシー</a>
+        <a href="/terms" className="hover:text-foreground transition-colors">利用規約</a>
+      </div>
     </nav>
   );
 }

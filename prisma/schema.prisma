@@ -78,12 +78,13 @@ model Company {
   lastFetchedAt   DateTime?
 
   // Relations
-  posts     Post[]
-  events    Event[]
-  analyses  AIAnalysis[]
-  wiki      WikiEntry[]
-  esDrafts  ESDraft[]
-  favorites FavoriteCompany[]
+  posts               Post[]
+  events              Event[]
+  analyses            AIAnalysis[]
+  wiki                WikiEntry[]
+  esDrafts            ESDraft[]
+  favorites           FavoriteCompany[]
+  eventParticipations EventParticipant[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -140,10 +141,23 @@ model Source {
   @@index([type])
 }
 
+model EventParticipant {
+  id        String @id @default(cuid())
+  eventId   String
+  companyId String
+  role      String @default("参加") // "主催" | "協賛" | "参加"
+
+  event   Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, companyId])
+  @@index([eventId])
+}
+
 model Event {
   id        String        @id @default(cuid())
   userId    String
-  companyId String
+  companyId String?
 
   category  EventCategory
   title     String
@@ -157,8 +171,10 @@ model Event {
   // Per-user status tracking
   status    EventStatus   @default(TODO)
 
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  participants EventParticipant[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -302,4 +318,24 @@ model CalendarEvent {
 
   @@index([userId, startTime])
   @@index([googleEventId])
+}
+
+// ─── News ─────────────────────────────────────────────────
+model NewsArticle {
+  id          String   @id @default(cuid())
+  title       String
+  summary     String
+  url         String   @unique
+  source      String   // "hatena" | "gnews" | "qiita" | "zenn"
+  category    String   // "CAREER_TIP" | "INTERNSHIP" | "COLUMN"
+  publishedAt DateTime
+  fetchedAt   DateTime @default(now())
+  isRead      Boolean  @default(false)
+  imageUrl    String?
+
+  createdAt DateTime @default(now())
+
+  @@index([publishedAt])
+  @@index([category])
+  @@index([isRead])
 }

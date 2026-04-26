@@ -1,5 +1,5 @@
-const OPENAI_URL = 'https://api.openai.com/v1/responses';
-const DEFAULT_MODEL = 'gpt-4.1-mini';
+const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
+const DEFAULT_MODEL = 'gpt-4o-mini';
 
 export type SummarizeOptions = {
   apiKey?: string;
@@ -66,7 +66,7 @@ ${text.slice(0, 800)}
       },
       body: JSON.stringify({
         model: opts.model ?? DEFAULT_MODEL,
-        input: prompt,
+        messages: [{ role: 'user', content: prompt }],
         temperature: 0.2
       })
     },
@@ -76,11 +76,9 @@ ${text.slice(0, 800)}
   if (!res.ok) return null;
 
   const data = (await res.json()) as {
-    output?: Array<{ content?: Array<{ type?: string; text?: string }> }>;
-    output_text?: string;
+    choices?: Array<{ message?: { content?: string } }>;
   };
-  const summary =
-    data?.output?.[0]?.content?.find((c) => c?.type === 'output_text')?.text ?? data?.output_text;
+  const summary = data?.choices?.[0]?.message?.content;
 
   return summary?.trim().slice(0, 200) ?? null;
 }

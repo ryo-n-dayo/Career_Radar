@@ -8,6 +8,33 @@ export type SiteFetchResult =
 const USER_AGENT = 'CareerRadarBot/1.0 (+https://example.com/bot)';
 const FETCH_TIMEOUT_MS = 15_000;
 
+async function isAllowedByRobots(url: string): Promise<boolean> {
+  try {
+    const { origin } = new URL(url);
+    const res = await fetch(`${origin}/robots.txt`, {
+      headers: { 'user-agent': USER_AGENT },
+      signal: AbortSignal.timeout(5_000),
+    });
+    if (!res.ok) return true;
+    const text = await res.text();
+    const path = new URL(url).pathname;
+    let inRelevantBlock = false;
+    for (const line of text.split('\n')) {
+      const trimmed = line.trim();
+      if (/^user-agent:/i.test(trimmed)) {
+        const agent = trimmed.split(':')[1].trim();
+        inRelevantBlock = agent === '*' || agent.toLowerCase() === 'careerradarbot';
+      } else if (inRelevantBlock && /^disallow:/i.test(trimmed)) {
+        const disallowed = trimmed.split(':')[1].trim();
+        if (disallowed && path.startsWith(disallowed)) return false;
+      }
+    }
+    return true;
+  } catch {
+    return true;
+  }
+}
+
 function normalizeHtml(html: string): string {
   return html
     .replace(/<!--[\s\S]*?-->/g, '')
@@ -25,6 +52,10 @@ export async function fetchSiteHash(
   url: string,
   previousHash: string | null
 ): Promise<SiteFetchResult> {
+  if (!(await isAllowedByRobots(url))) {
+    return { status: 'error', error: 'robots.txt によりアクセスが許可されていません' };
+  }
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 

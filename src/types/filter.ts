@@ -9,10 +9,10 @@ export interface FilterState {
   keyword: string;
 }
 
-export type Category = '説明会' | '早期選考' | '本選考' | 'インターン' | 'セミナー';
+export type Category = 'インターン' | '説明会' | '選考';
 
 export const ALL_CATEGORIES: Category[] = [
-  '説明会', '早期選考', '本選考', 'インターン', 'セミナー'
+  'インターン', '説明会', '選考'
 ];
 
 export const DEFAULT_FILTER: FilterState = {

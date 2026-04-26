@@ -106,7 +106,7 @@ export function RadarTable({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
   }, [selectedId]);
 
   const sorted = useMemo(() => {
@@ -200,10 +200,12 @@ export function RadarTable({
                     <div
                       className={cn(
                         "grid h-11 w-11 shrink-0 place-items-center rounded-xl text-base font-bold",
-                        avatar
+                        row.isJoint
+                          ? "bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300"
+                          : avatar
                       )}
                     >
-                      {initial}
+                      {row.isJoint ? "複" : initial}
                     </div>
 
                     {/* Middle */}
@@ -212,6 +214,11 @@ export function RadarTable({
                         <h3 className="truncate text-[15px] font-semibold tracking-tight">
                           {row.companyName}
                         </h3>
+                        {row.isJoint && row.participants && (
+                          <span className="yui-pill shrink-0 bg-violet-100/80 px-1.5 py-0.5 text-[10px] font-medium text-violet-700 dark:bg-violet-950/40 dark:text-violet-300">
+                            {row.participants.length}社
+                          </span>
+                        )}
                         <span
                           className={cn(
                             "yui-pill shrink-0 px-1.5 py-0.5 text-[10px] font-medium",
