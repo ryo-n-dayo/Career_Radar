@@ -346,10 +346,6 @@ function DashboardContent() {
             onClose={() => setIsRightOpen(false)}
             isSaved={selected ? savedIds.has(selected.id) : false}
             onToggleSaved={toggleSaved}
-            isCalendarAdded={selected ? !!calendarAddedMap[selected.id] : false}
-            calendarEventLink={selected ? calendarAddedMap[selected.id]?.htmlLink : undefined}
-            isAddingToCalendar={addingCalendarId === selected?.id}
-            onAddToCalendar={handleAddToCalendar}
           />
         </div>
       </div>
