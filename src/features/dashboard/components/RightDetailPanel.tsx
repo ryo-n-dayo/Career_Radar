@@ -59,6 +59,17 @@ function DeadlineRing({ date }: { date: string }) {
   );
 }
 
+/** Google Calendar の「イベント追加」URLを生成する（OAuth 不要） */
+function buildGoogleCalendarUrl(item: RadarItem): string {
+  const start = item.date.replace(/-/g, "");
+  const nextDay = new Date(item.date);
+  nextDay.setDate(nextDay.getDate() + 1);
+  const end = nextDay.toISOString().split("T")[0].replace(/-/g, "");
+  const title = encodeURIComponent(`${item.category}: ${item.companyName}`);
+  const details = encodeURIComponent(item.content);
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}%2F${end}&details=${details}`;
+}
+
 function DataRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start gap-3 py-1.5 text-sm">
@@ -184,10 +195,6 @@ type Props = {
   onClose: () => void;
   isSaved: boolean;
   onToggleSaved: (id: string) => void;
-  isCalendarAdded?: boolean;
-  calendarEventLink?: string;
-  isAddingToCalendar?: boolean;
-  onAddToCalendar?: (item: RadarItem) => void;
 };
 
 function Section({
@@ -220,10 +227,6 @@ export function RightDetailPanel({
   onClose,
   isSaved,
   onToggleSaved,
-  isCalendarAdded = false,
-  calendarEventLink,
-  isAddingToCalendar = false,
-  onAddToCalendar,
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -294,36 +297,20 @@ export function RightDetailPanel({
                 <DeadlineRing date={item.date} />
 
                 <div className="ml-auto flex items-center gap-2">
-                  {/* ── カレンダーに追加 ── */}
-                  <button
-                    type="button"
-                    onClick={() => onAddToCalendar?.(item)}
-                    disabled={isAddingToCalendar || isCalendarAdded}
+                  {/* ── Googleカレンダーに追加 ── */}
+                  <a
+                    href={buildGoogleCalendarUrl(item)}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className={cn(
                       "inline-flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-medium shadow-sm transition",
-                      isCalendarAdded
-                        ? "border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
-                        : "border border-border bg-background text-foreground hover:border-[hsl(var(--accent))]/50"
+                      "border border-border bg-background text-foreground",
+                      "hover:border-[hsl(var(--accent))]/60 hover:bg-[hsl(var(--accent))]/5"
                     )}
                   >
-                    <span>
-                      {isAddingToCalendar ? "⌛" : isCalendarAdded ? "✓" : "📅"}
-                    </span>
-                    <span>
-                      {isAddingToCalendar ? "追加中…" : isCalendarAdded ? "追加済み" : "カレンダー"}
-                    </span>
-                  </button>
-                  {/* 追加済みなら Google Calendar へのリンク */}
-                  {isCalendarAdded && calendarEventLink && (
-                    <a
-                      href={calendarEventLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-[hsl(var(--accent))] underline underline-offset-2 hover:opacity-80"
-                    >
-                      開く↗
-                    </a>
-                  )}
+                    <span>📅</span>
+                    <span>Googleカレンダーに追加</span>
+                  </a>
 
                   {/* ── 保存ボタン ── */}
                   <button

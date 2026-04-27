@@ -46,6 +46,16 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 const DAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
 
+/** Google Calendar の「イベント追加」URLを生成（OAuth 不要） */
+function buildGoogleCalendarUrl(ev: CalendarEvent): string {
+  const start = format(new Date(ev.startTime), "yyyyMMdd");
+  const nextDay = new Date(ev.startTime);
+  nextDay.setDate(nextDay.getDate() + 1);
+  const end = format(nextDay, "yyyyMMdd");
+  const title = encodeURIComponent(ev.title);
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}%2F${end}`;
+}
+
 export function Calendar({ events = [], onDateSelect, selectedDate }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
@@ -184,9 +194,9 @@ export function Calendar({ events = [], onDateSelect, selectedDate }: CalendarPr
               return (
                 <div
                   key={ev.id}
-                  className="flex items-start gap-3 rounded-xl border border-border bg-muted/20 p-3"
+                  className="flex items-center gap-3 rounded-xl border border-border bg-muted/20 p-3"
                 >
-                  <span className={cn("yui-pill mt-0.5 shrink-0 px-2 py-0.5 text-[10px] font-medium", colorCls)}>
+                  <span className={cn("yui-pill shrink-0 px-2 py-0.5 text-[10px] font-medium", colorCls)}>
                     {ev.isFromGoogle ? "Google" : ev.category}
                   </span>
                   <div className="min-w-0 flex-1">
@@ -198,6 +208,17 @@ export function Calendar({ events = [], onDateSelect, selectedDate }: CalendarPr
                       {ev.location && ` @ ${ev.location}`}
                     </div>
                   </div>
+                  {!ev.isFromGoogle && (
+                    <a
+                      href={buildGoogleCalendarUrl(ev)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-border bg-background px-2.5 py-1.5 text-[11px] font-medium text-foreground transition hover:border-[hsl(var(--accent))]/60 hover:bg-[hsl(var(--accent))]/5"
+                    >
+                      <span>📅</span>
+                      <span>追加</span>
+                    </a>
+                  )}
                 </div>
               );
             })}
