@@ -11,6 +11,11 @@
 
 ---
 
+
+<img width="2226" height="1342" alt="image" src="https://github.com/user-attachments/assets/4d3af5aa-371f-4035-8749-751f394b889d" />
+<img width="2223" height="1343" alt="image" src="https://github.com/user-attachments/assets/02247e93-52e0-4b3d-81d9-adc5adc6d12b" />
+<img width="2221" height="1391" alt="image" src="https://github.com/user-attachments/assets/efc2ac30-036a-4527-a0b7-9a0d9f77249b" />
+
 ## 主要機能
 
 ### コア機能
@@ -45,7 +50,6 @@
 
 | 機能 | 説明 |
 |------|------|
-| **採用熱量スコア** | 0〜100 のヒートスコアで企業の採用活発度を数値化 |
 | **AI 要約** | 投稿・記事の自動要約生成 |
 | **キーワード抽出** | 投稿から採用関連キーワードを自動抽出・タグ表示 |
 
@@ -251,7 +255,7 @@ JointEvent（合同説明会）
 
 ## デザインシステム
 
-yui540 風のキャラメル × クリームカラーを基調としたデザイン。
+yui540 さんを参考にさせていただきました。
 
 | CSS 変数 | 値 | 用途 |
 |----------|----|------|
