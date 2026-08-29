@@ -4,18 +4,21 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { radarItems } from "../mock/radarItems";
+import { useCompanyCredentials } from "../hooks/useCompanyCredentials";
+import type { RadarItem } from "../types/radarItem";
 
-type ViewMode = "db" | "calendar" | "news";
+type ViewMode = "db" | "calendar" | "news" | "expired" | "selfpr" | "mypage";
 
 type Props = {
   viewMode: ViewMode;
   onChangeView: (mode: ViewMode) => void;
   newsUnread?: number;
+  items: RadarItem[];
 };
 
-export function LeftNav({ viewMode, onChangeView, newsUnread = 0 }: Props) {
+export function LeftNav({ viewMode, onChangeView, newsUnread = 0, items }: Props) {
   const [isDark, setIsDark] = useState(false);
+  const { all: credentials } = useCompanyCredentials();
 
   const initial = useMemo(() => {
     if (typeof window === "undefined") return false;
@@ -39,14 +42,21 @@ export function LeftNav({ viewMode, onChangeView, newsUnread = 0 }: Props) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     let within7 = 0;
-    for (const r of radarItems) {
+    for (const r of items) {
       const d = new Date(r.date);
       d.setHours(0, 0, 0, 0);
       const diff = Math.round((d.getTime() - today.getTime()) / 86400000);
       if (diff >= 0 && diff <= 7) within7 += 1;
     }
-    return { within7, total: radarItems.length };
-  }, []);
+    let expired = 0;
+    for (const r of items) {
+      const d = new Date(r.date);
+      d.setHours(0, 0, 0, 0);
+      if (d.getTime() < today.getTime()) expired += 1;
+    }
+    const mypage = items.filter((r) => r.saved || Boolean(credentials[r.id])).length;
+    return { within7, total: items.length, expired, mypage };
+  }, [items, credentials]);
 
   const handleGoogleAuth = async () => {
     try {
@@ -106,6 +116,9 @@ export function LeftNav({ viewMode, onChangeView, newsUnread = 0 }: Props) {
               { key: "db", label: "📋 メインDB", icon: null },
               { key: "calendar", label: "📅 カレンダー", icon: null },
               { key: "news", label: "📰 今日のニュース", badge: newsUnread },
+              { key: "expired", label: "⏰ 期限切れ", badge: summary.expired, icon: null },
+              { key: "selfpr", label: "📝 自己PRライブラリ", icon: null },
+              { key: "mypage", label: "🔑 マイページ管理", badge: summary.mypage, icon: null },
             ] as Array<{ key: ViewMode; label: string; badge?: number; icon: null }>
           ).map(({ key, label, badge }) => (
             <button

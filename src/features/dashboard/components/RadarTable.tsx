@@ -19,6 +19,7 @@ type Props = {
   compareMode?: boolean;
   compareSelected?: Set<string>;
   onToggleCompare?: (id: string) => void;
+  title?: string;
 };
 
 function daysUntil(dateStr: string): { days: number; label: string } {
@@ -101,7 +102,8 @@ export function RadarTable({
   onResetFilter,
   compareMode = false,
   compareSelected,
-  onToggleCompare
+  onToggleCompare,
+  title = "メインDB"
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -125,7 +127,7 @@ export function RadarTable({
   return (
     <section className="flex flex-1 min-h-0 min-w-0 flex-col">
       <div className="flex items-center gap-3 px-1 py-2">
-        <div className="text-sm font-semibold tracking-tight">メインDB</div>
+        <div className="text-sm font-semibold tracking-tight">{title}</div>
         <div className="text-xs text-muted-foreground">{sorted.length}件</div>
         <div className="ml-auto flex items-center gap-1 rounded-full border border-border bg-background p-0.5 shadow-sm">
           <button

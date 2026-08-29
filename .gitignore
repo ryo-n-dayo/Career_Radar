@@ -55,3 +55,6 @@ prisma/.env
 
 # Optional eslint cache
 .eslintcache
+
+# Claude Code scratch worktrees
+.claude/worktrees/

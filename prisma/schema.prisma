@@ -73,6 +73,9 @@ model Company {
   instagramUrl String?
   industry     String?
 
+  // CompanyProfile（会社概要・社風など）をそのまま保存
+  profile Json?
+
   // Site monitoring
   lastFetchedHash String?
   lastFetchedAt   DateTime?
@@ -167,6 +170,13 @@ model Event {
   startsAt  DateTime?
   endsAt    DateTime?
   deadline  DateTime?
+
+  // RadarItem表示用（ダッシュボードの一覧・詳細パネルで直接使用）
+  deadlineLabel String? // "締切" | "早期選考" | "説明会"
+  aiHeat        Int?    // 0-100
+  keywords      Json?   // string[]
+  sources       Json?   // SourceInfo[]
+  trust         String  @default("needs_review") // "official" | "needs_review"
 
   // Per-user status tracking
   status    EventStatus   @default(TODO)

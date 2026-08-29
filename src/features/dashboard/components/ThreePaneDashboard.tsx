@@ -5,10 +5,9 @@ import { useCallback, useEffect, useMemo, useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { FilterBar } from "@/components/timeline/FilterBar";
 import { useFilterState } from "@/hooks/useFilterState";
-import { applyFilters } from "@/lib/filters";
+import { applyFilters, isExpired } from "@/lib/filters";
 import { Calendar, type CalendarEvent } from "@/components/ui/calendar";
 
-import { radarItems } from "../mock/radarItems";
 import type { RadarItem } from "../types/radarItem";
 import { CompareDialog } from "./CompareDialog";
 import { LeftNav } from "./LeftNav";
@@ -16,11 +15,13 @@ import { NewItemsBanner } from "./NewItemsBanner";
 import { RadarTable, type SortKey } from "./RadarTable";
 import { RightDetailPanel } from "./RightDetailPanel";
 import { NewsPanel } from "@/features/news/NewsPanel";
+import { SelfPRLibraryPanel } from "./SelfPRLibraryPanel";
+import { MyPageListPanel } from "./MyPageListPanel";
 
 const GRID_OPEN = "240px minmax(0, 1fr) 600px";
 const GRID_CLOSED = "240px minmax(0, 1fr) 0px";
 
-type ViewMode = "db" | "calendar" | "news";
+type ViewMode = "db" | "calendar" | "news" | "expired" | "selfpr" | "mypage";
 
 type CalendarAddedEntry = { eventId: string; htmlLink: string };
 
@@ -32,7 +33,8 @@ function loadCalendarAddedMap(): Record<string, CalendarAddedEntry> {
   }
 }
 
-function DashboardContent() {
+function DashboardContent({ initialItems }: { initialItems: RadarItem[] }) {
+  const radarItems = initialItems;
   const { filter, updateFilter, resetFilter, isFiltered } = useFilterState();
 
   // ─── View / UI State ───
@@ -126,6 +128,15 @@ function DashboardContent() {
     [filteredItems, savedOnly]
   );
 
+  const activeItems = useMemo(
+    () => savedFilteredItems.filter((item) => !isExpired(item.date)),
+    [savedFilteredItems]
+  );
+  const expiredItems = useMemo(
+    () => savedFilteredItems.filter((item) => isExpired(item.date)),
+    [savedFilteredItems]
+  );
+
   const selected =
     savedFilteredItems.find((r) => r.id === selectedId) ?? savedFilteredItems[0] ?? filteredItems[0];
   const effectiveSelectedId = selected?.id;
@@ -199,6 +210,7 @@ function DashboardContent() {
             viewMode={viewMode}
             onChangeView={setViewMode}
             newsUnread={newsUnread}
+            items={radarItems}
           />
         </div>
 
@@ -213,6 +225,9 @@ function DashboardContent() {
                 {viewMode === "db" && "メインDB"}
                 {viewMode === "calendar" && "カレンダー"}
                 {viewMode === "news" && "📰 今日のニュース"}
+                {viewMode === "expired" && "⏰ 期限切れ"}
+                {viewMode === "selfpr" && "📝 自己PRライブラリ"}
+                {viewMode === "mypage" && "🔑 マイページ管理"}
               </div>
 
               <div className="flex items-center gap-2 ml-auto">
@@ -297,6 +312,44 @@ function DashboardContent() {
                 ) : viewMode === "news" ? (
                   <NewsPanel />
 
+                ) : viewMode === "selfpr" ? (
+                  <SelfPRLibraryPanel />
+
+                ) : viewMode === "mypage" ? (
+                  <MyPageListPanel items={itemsWithSaved} />
+
+                ) : viewMode === "expired" ? (
+                  /* ─── 期限切れ ─── */
+                  <>
+                    <div className="mb-4 flex flex-wrap items-center gap-2">
+                      <div className="text-xs text-muted-foreground">
+                        締切・開催日を過ぎた情報（{expiredItems.length}件）
+                      </div>
+                    </div>
+
+                    <FilterBar
+                      filter={filter}
+                      onUpdate={updateFilter}
+                      onReset={resetFilter}
+                      isFiltered={isFiltered}
+                    />
+
+                    <RadarTable
+                      title="期限切れ"
+                      items={expiredItems}
+                      selectedId={effectiveSelectedId}
+                      onSelect={(id) => {
+                        setSelectedId(id);
+                        setIsRightOpen(true);
+                      }}
+                      sortKey={sortKey}
+                      onChangeSort={setSortKey}
+                      onResetFilter={resetFilter}
+                      compareMode={compareMode}
+                      compareSelected={compareIds}
+                      onToggleCompare={toggleCompare}
+                    />
+                  </>
                 ) : (
                   /* ─── メインDB ─── */
                   <>
@@ -315,7 +368,7 @@ function DashboardContent() {
                     />
 
                     <RadarTable
-                      items={savedFilteredItems}
+                      items={activeItems}
                       selectedId={effectiveSelectedId}
                       onSelect={(id) => {
                         setSelectedId(id);
@@ -361,7 +414,7 @@ function DashboardContent() {
   );
 }
 
-export function ThreePaneDashboard() {
+export function ThreePaneDashboard({ initialItems }: { initialItems: RadarItem[] }) {
   return (
     <Suspense
       fallback={
@@ -370,7 +423,7 @@ export function ThreePaneDashboard() {
         </div>
       }
     >
-      <DashboardContent />
+      <DashboardContent initialItems={initialItems} />
     </Suspense>
   );
 }

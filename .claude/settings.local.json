@@ -44,7 +44,8 @@
       "Bash(gh pr create --title 'fix 3-pane grid, remove AI熱量, add AI分析 company profile view' --body ' *)",
       "Bash(git fetch *)",
       "Bash(git checkout *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(grep -v '^$')"
     ]
   }
 }

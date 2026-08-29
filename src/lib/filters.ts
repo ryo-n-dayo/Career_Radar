@@ -33,6 +33,10 @@ export function applyFilters(posts: RadarItem[], filter: FilterState): RadarItem
   });
 }
 
+export function isExpired(date: string): boolean {
+  return new Date(date) < startOfDay(new Date());
+}
+
 export function resolveDatePreset(preset: string): { from: Date | null; to: Date | null } {
   const now = new Date();
   switch (preset) {

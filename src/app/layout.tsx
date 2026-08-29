@@ -3,7 +3,16 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Next.js App",
-  description: "Generated starter"
+  description: "Generated starter",
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false
+    }
+  }
 };
 
 export default function RootLayout({

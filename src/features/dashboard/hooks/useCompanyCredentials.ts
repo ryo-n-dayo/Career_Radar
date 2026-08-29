@@ -13,6 +13,7 @@ export type CompanyCredential = {
 type Store = Record<string, CompanyCredential>;
 
 const STORAGE_KEY = "career-radar:company-credentials";
+const CHANGE_EVENT = "career-radar:company-credentials-changed";
 
 function readStore(): Store {
   if (typeof window === "undefined") return {};
@@ -29,6 +30,7 @@ function readStore(): Store {
 function writeStore(store: Store) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  window.dispatchEvent(new Event(CHANGE_EVENT));
 }
 
 export function useCompanyCredentials() {
@@ -36,11 +38,16 @@ export function useCompanyCredentials() {
 
   useEffect(() => {
     setStore(readStore());
-    const handler = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY) setStore(readStore());
+    const refresh = () => setStore(readStore());
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY) refresh();
     };
-    window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
+    window.addEventListener("storage", onStorage);
+    window.addEventListener(CHANGE_EVENT, refresh);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener(CHANGE_EVENT, refresh);
+    };
   }, []);
 
   const get = useCallback(

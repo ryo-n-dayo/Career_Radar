@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 
 import type { CompanyProfile, JointParticipant, RadarItem } from "../types/radarItem";
 import { CredentialsSection } from "./CredentialsSection";
+import { ESNotesSection } from "./ESNotesSection";
 
 function DeadlineRing({ date }: { date: string }) {
   const size = 72;
@@ -229,9 +230,11 @@ export function RightDetailPanel({
   onToggleSaved,
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [showSnippetPicker, setShowSnippetPicker] = useState(false);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 });
+    setShowSnippetPicker(false);
   }, [item?.id]);
 
   return (
@@ -239,7 +242,13 @@ export function RightDetailPanel({
       <div className="flex items-center gap-2 px-4 py-3">
         <div className="text-sm font-semibold tracking-tight">詳細</div>
         <div className="ml-auto flex items-center gap-1.5">
-          <Button variant="outline" size="sm" className="yui-pill" disabled={!item}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="yui-pill"
+            disabled={!item}
+            onClick={() => setShowSnippetPicker((v) => !v)}
+          >
             ESに引用
           </Button>
           <Button variant="ghost" size="sm" className="yui-pill" onClick={onClose}>
@@ -433,6 +442,15 @@ export function RightDetailPanel({
             {/* マイページ認証情報 */}
             <Section title="マイページ認証情報" delay={0.22}>
               <CredentialsSection companyId={item.id} companyName={item.companyName} />
+            </Section>
+
+            {/* ESメモ */}
+            <Section title="ESメモ" delay={0.24}>
+              <ESNotesSection
+                companyId={item.id}
+                showPicker={showSnippetPicker}
+                onClosePicker={() => setShowSnippetPicker(false)}
+              />
             </Section>
 
 

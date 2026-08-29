@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { fetchSiteHash } from '@/lib/fetchers/officialSite';
+import { extractEventInfo } from '@/lib/ai/extractEventInfo';
+import { DEFAULT_USER_ID, ensureDefaultUser } from '@/lib/defaultUser';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -11,7 +13,8 @@ type FetchSummary = {
   url: string;
   status: 'unchanged' | 'changed' | 'error' | 'skipped';
   error?: string;
-  postsCreated?: number;
+  postCreated?: boolean;
+  eventUpdated?: boolean;
 };
 
 export async function GET(request: NextRequest) {
@@ -25,23 +28,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const favorites = await prisma.favoriteCompany.findMany({
-    include: { company: true }
-  });
+  await ensureDefaultUser();
 
-  const companyMap = new Map<string, { company: typeof favorites[number]['company']; userIds: string[] }>();
-  for (const fav of favorites) {
-    const entry = companyMap.get(fav.companyId);
-    if (entry) {
-      entry.userIds.push(fav.userId);
-    } else {
-      companyMap.set(fav.companyId, { company: fav.company, userIds: [fav.userId] });
-    }
-  }
+  // 対象: 全企業（お気に入りに限定しない）
+  const companies = await prisma.company.findMany();
 
   const summaries: FetchSummary[] = [];
 
-  for (const { company, userIds } of companyMap.values()) {
+  for (const company of companies) {
     const url = company.careersUrl ?? company.officialUrl;
     if (!url) {
       summaries.push({
@@ -77,24 +71,46 @@ export async function GET(request: NextRequest) {
       continue;
     }
 
-    let created = 0;
-    for (const userId of userIds) {
-      try {
-        await prisma.post.create({
+    // changed: 新着Postを作成
+    let postCreated = false;
+    try {
+      await prisma.post.create({
+        data: {
+          userId: DEFAULT_USER_ID,
+          companyId: company.id,
+          source: 'WEB',
+          url,
+          title: `${company.name} 採用ページが更新されました`,
+          postedAt: new Date(),
+          externalId: `${DEFAULT_USER_ID}_${company.id}_${result.hash}`,
+          isNew: true
+        }
+      });
+      postCreated = true;
+    } catch {
+      // unique constraint → already recorded
+    }
+
+    // 変更検知時のみAIで締切・カテゴリを抽出し、直近のEventを更新（コスト抑制のため変更時のみ実行）
+    let eventUpdated = false;
+    const extracted = await extractEventInfo(company.name, result.html);
+    if (extracted) {
+      const targetEvent = await prisma.event.findFirst({
+        where: { companyId: company.id, userId: DEFAULT_USER_ID },
+        orderBy: { deadline: 'asc' }
+      });
+
+      if (targetEvent) {
+        await prisma.event.update({
+          where: { id: targetEvent.id },
           data: {
-            userId,
-            companyId: company.id,
-            source: 'WEB',
-            url,
-            title: `${company.name} 採用ページが更新されました`,
-            postedAt: new Date(),
-            externalId: `${userId}_${company.id}_${result.hash}`,
-            isNew: true
+            deadline: extracted.deadline ? new Date(extracted.deadline) : targetEvent.deadline,
+            deadlineLabel: extracted.deadlineLabel ?? targetEvent.deadlineLabel,
+            content: extracted.summary ?? targetEvent.content,
+            trust: 'needs_review'
           }
         });
-        created += 1;
-      } catch {
-        // unique constraint → already recorded, skip
+        eventUpdated = true;
       }
     }
 
@@ -103,7 +119,8 @@ export async function GET(request: NextRequest) {
       companyName: company.name,
       url,
       status: 'changed',
-      postsCreated: created
+      postCreated,
+      eventUpdated
     });
   }
 

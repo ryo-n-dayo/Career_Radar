@@ -96,3 +96,4 @@ Error: ENOENT: no such file or directory, scandir '/Users/nishikawaryo/Library/C
   path: '/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app/src/app'
 }
  ⨯ Module not found: Error: Can't resolve 'next-flight-client-entry-loader' in '/Users/nishikawaryo/Library/CloudStorage/GoogleDrive-ppajt5zzcf@gmail.com/My Drive/G_PROGRAM/GitHub/nextjs-app'
+[?25h

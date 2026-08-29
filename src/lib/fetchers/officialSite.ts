@@ -2,7 +2,7 @@ import { createHash } from 'crypto';
 
 export type SiteFetchResult =
   | { status: 'unchanged'; hash: string }
-  | { status: 'changed'; hash: string; previousHash: string | null }
+  | { status: 'changed'; hash: string; previousHash: string | null; html: string }
   | { status: 'error'; error: string };
 
 const USER_AGENT = 'CareerRadarBot/1.0 (+https://example.com/bot)';
@@ -76,7 +76,7 @@ export async function fetchSiteHash(
     if (previousHash && previousHash === hash) {
       return { status: 'unchanged', hash };
     }
-    return { status: 'changed', hash, previousHash };
+    return { status: 'changed', hash, previousHash, html };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     return { status: 'error', error: msg };
