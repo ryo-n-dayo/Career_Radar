@@ -58,3 +58,9 @@ prisma/.env
 
 # Claude Code scratch worktrees
 .claude/worktrees/
+
+# Build artifacts / logs
+tsconfig.tsbuildinfo
+.server.log
+prisma/*.db
+prisma/*.db-journal

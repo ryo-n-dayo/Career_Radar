@@ -1,287 +1,137 @@
-# Career Radar
+# Event Radar
 
-> **就活情報を一元管理する Next.js ダッシュボードアプリ**  
-> 企業の採用イベント・説明会・選考情報を集約し、締切管理・AI 要約・X 取り込み・Google 連携を提供する。
+> **ハッカソン・ビジコン・企業主催イベントを一箇所にまとめる Next.js アプリ**
+> 方々に散らばっているイベント募集情報を集約し、締切から逆算して探せるようにする。
 
 ---
 
 ## なぜ作ったか
 
-最近の世の中は情報過多で、毎日 X・インスタ・LinkedIn・公式サイトなど大量の情報が流れてくる。いちいち見に行く時間は使いたくないけど、有益な採用情報は見逃したくない——そんな課題を解決するために作った。
+ハッカソンやビジネスコンテスト、企業主催の勉強会・インターンの案内は、connpass・企業サイト・SNS などバラバラの場所に転がっている。探しに行くのは面倒だが、締切を過ぎてから知るのはもっと惜しい。だから「一覧で眺めて、締切が近い順に並べて、気になったらカレンダーに入れる」だけができるサイトを作った。
+
+ログイン不要。保存はブラウザの localStorage に閉じている。
 
 ---
-
-
-<img width="2226" height="1342" alt="image" src="https://github.com/user-attachments/assets/4d3af5aa-371f-4035-8749-751f394b889d" />
-<img width="2223" height="1343" alt="image" src="https://github.com/user-attachments/assets/02247e93-52e0-4b3d-81d9-adc5adc6d12b" />
-<img width="2221" height="1391" alt="image" src="https://github.com/user-attachments/assets/efc2ac30-036a-4527-a0b7-9a0d9f77249b" />
 
 ## 主要機能
 
-### コア機能
-
 | 機能 | 説明 |
 |------|------|
-| **メインDB** | 企業採用情報（インターン／早期選考／セミナー／本選考／説明会）の集約管理 |
-| **締切カウントダウン** | SVG リングアニメで残日数を可視化（3日以内→赤・それ以上→アクセント） |
-| **フィルタリング** | 期間・カテゴリ・ソース・キーワード検索の複合フィルタ |
-| **企業比較モード** | 複数企業をチェックして横並びで比較できるダイアログ |
-| **お気に入り保存** | ★ ボタンで保存、保存済みのみ表示フィルタ |
-
-### 連携・取り込み機能
-
-| 機能 | 説明 |
-|------|------|
-| **X（Twitter）取り込み** | 投稿本文を AI キーワードマッチング・要約して DB へ登録 |
-| **Gmail 同期** | 採用メールを自動取得・管理 |
-| **Google Calendar 連携** | 右パネルのボタンでワンクリックで締切日を Google Calendar に追加。カレンダービューからも個別追加可能 |
-| **ニュースパネル** | Hatena / Google News / Qiita / Zenn からキャリア関連ニュースを取得 |
-
-### カレンダー機能
-
-| 機能 | 説明 |
-|------|------|
-| **📅 カレンダーに追加ボタン** | 右詳細パネル・カレンダービューどちらからもワンクリックで Google Calendar に終日イベント登録 |
-| **カテゴリ別カラー** | インターン→青・早期選考→オレンジ・セミナー→緑・本選考→赤・説明会→紫 |
-| **統合カレンダービュー** | メインDB 全件の締切日とGoogle Calendar イベントを 1 つのカレンダーに統合表示 |
-| **今日ハイライト** | 当日をオレンジ丸でマーク、日曜→赤・土曜→青 |
-
-### AI 分析機能
-
-| 機能 | 説明 |
-|------|------|
-| **AI 要約** | 投稿・記事の自動要約生成 |
-| **キーワード抽出** | 投稿から採用関連キーワードを自動抽出・タグ表示 |
-
-### 補助機能
-
-- **ES 下書き**：投稿・イベント・Wiki からの引用付きドラフト作成
-- **マイページ認証情報保存**：各社マイページの ID／パスワードを localStorage に保存
-- **テーマ切り替え**：ダーク／ライトモード（localStorage で永続化）
-- **新着バナー**：未読フラグ付き新着投稿の通知
-
----
-
-## 技術スタック
-
-### フレームワーク・言語
-
-| 技術 | バージョン | 用途 |
-|------|-----------|------|
-| Next.js | 14.2.0 | フルスタック Web フレームワーク（App Router） |
-| React | 18.3.0 | UI ライブラリ |
-| TypeScript | 5.0.0 | 型安全な開発 |
-
-### スタイリング
-
-| 技術 | バージョン | 用途 |
-|------|-----------|------|
-| Tailwind CSS | 3.0.0 | ユーティリティ CSS |
-| tailwind-merge | 3.5.0 | クラス名の競合解消 |
-| tailwindcss-animate | 1.0.7 | アニメーションユーティリティ |
-| class-variance-authority | 0.7.1 | UI バリアント管理 |
-
-### バックエンド・DB
-
-| 技術 | 用途 |
-|------|------|
-| Prisma | ORM・マイグレーション管理 |
-| SQLite | 開発環境 DB |
-| PostgreSQL (Supabase) | 本番環境 DB |
-
-### 外部連携
-
-| 技術 | 用途 |
-|------|------|
-| googleapis | Gmail / Calendar API |
-| @react-oauth/google | Google OAuth フロー |
-| next-auth | 認証セッション管理 |
-
-### ユーティリティ・テスト
-
-| 技術 | 用途 |
-|------|------|
-| date-fns | 日付計算・フォーマット |
-| Lucide React | SVG アイコン |
-| Vitest | ユニットテスト |
-| ESLint | コード品質チェック |
+| **イベント一覧** | ハッカソン / コンテスト / インターン / 勉強会 / セミナーを1つのリストに集約 |
+| **締切カウントダウン** | SVG リングで残日数を可視化（3日以内→赤・7日以内→アクセント色） |
+| **フィルタ** | 種別・開催形式（オンライン/オフライン/ハイブリッド）・地域・期間・キーワード。URL クエリに同期するので絞り込んだ状態を共有できる |
+| **カレンダービュー** | 月次カレンダー上に開催日を種別ごとの色で表示 |
+| **保存** | ★ で保存、「保存済み」ビューで一覧。localStorage のみ |
+| **カレンダー連携** | Googleカレンダー追加リンク / `.ics` ダウンロード。OAuth 不要 |
+| **個別ページ** | `/events/[id]` に OGP 付きの共有用ページ |
 
 ---
 
 ## セットアップ
 
-### 1. インストール・起動
-
-Node.js（LTS 推奨）をインストールした上で実行：
-
 ```bash
 npm install
+cp .env.example .env
+# .env の DATABASE_URL / DIRECT_URL に Neon の接続文字列を設定する
+npm run prisma:migrate
+npm run db:seed
 npm run dev
 ```
 
-ブラウザで `http://localhost:3000` を開く。
+`prisma/seed.ts` は **デモ用のサンプルイベント**（架空の主催者・`example.com` の URL）を投入する。UI の確認用であり、実データは取り込みコネクタ経由で入る。
 
-### 2. 環境変数
-
-`.env.example` をコピーして `.env` を作成し、必要な値を設定：
+### よく使うコマンド
 
 ```bash
-cp .env.example .env
-```
-
-### 3. DB セットアップ（Prisma）
-
-```bash
+npm run dev            # 開発サーバー
+npm run build          # 本番ビルド（DATABASE_URL が必要）
+npm run lint           # ESLint
+npm run test           # Vitest
 npm run prisma:generate
-npm run prisma:migrate -- --name init
+npm run prisma:migrate # 開発用マイグレーション
+npm run prisma:deploy  # 本番マイグレーション適用
+npm run prisma:studio
 npm run db:seed
 ```
 
-確認用 Prisma Studio：
-
-```bash
-npm run prisma:studio
-```
-
-### トラブルシューティング
-
-**`EMFILE: too many open files` が出る場合：**
-
-```bash
-CHOKIDAR_USEPOLLING=1 npm run dev
-```
-
 ---
 
-## よく使うコマンド
-
-```bash
-npm run dev              # 開発サーバー起動
-npm run build            # 本番ビルド
-npm run lint             # ESLint
-npm run test             # Vitest（単発）
-npm run test:watch       # Vitest watch
-npm run prisma:generate  # Prisma クライアント生成
-npm run prisma:migrate   # マイグレーション実行
-npm run prisma:studio    # Prisma Studio
-npm run db:seed          # シードデータ投入
-```
-
----
-
-## API エンドポイント
-
-| エンドポイント | メソッド | 機能 |
-|--------------|---------|------|
-| `/api/posts/new` | GET | 新着投稿一覧取得 |
-| `/api/posts/new` | POST | 既読マーク |
-| `/api/posts/x-import` | POST | X 投稿取り込み（AI 要約付き） |
-| `/api/auth/google` | GET | Google OAuth URL 生成 |
-| `/api/auth/google` | POST | OAuth コールバック・トークン保存 |
-| `/api/gmail/sync` | GET | Gmail 未読メール同期 |
-| `/api/calendar/sync` | GET | Google Calendar イベント同期 |
-| `/api/calendar/add-event` | POST | 締切日を Google Calendar に追加 |
-| `/api/news/list` | GET | ニュース一覧・未読カウント |
-| `/api/news/refresh` | GET | 外部ソースから再取得 |
-| `/api/cron/daily-fetch` | GET | 日次定期ジョブ |
-
----
-
-## ディレクトリ構成
+## アーキテクチャ
 
 ```
 src/
-├── app/
-│   ├── page.tsx                # ホーム（ThreePaneDashboard）
-│   ├── layout.tsx              # ルートレイアウト
-│   ├── globals.css             # CSS 変数 + keyframes
-│   └── api/
-│       ├── auth/google/        # Google OAuth
-│       ├── posts/              # 投稿管理・X 取り込み
-│       ├── gmail/sync/         # Gmail 同期
-│       ├── calendar/sync/      # Google Calendar 読み込み
-│       ├── calendar/add-event/ # Google Calendar 書き込み
-│       ├── news/               # ニュース取得
-│       └── cron/daily-fetch/   # 定期ジョブ
-├── components/
-│   ├── ui/                     # shadcn 互換 UI パーツ
-│   └── timeline/               # FilterBar / SourceBadge
-├── features/
-│   ├── dashboard/
-│   │   ├── components/         # ThreePaneDashboard・RadarTable・RightDetailPanel など
-│   │   ├── mock/               # radarItems.ts（30 社分のモックデータ）
-│   │   ├── types/              # RadarItem / CompanyProfile
-│   │   └── hooks/              # useCompanyCredentials
-│   └── news/
-│       └── NewsPanel.tsx
-├── hooks/
-│   └── useFilterState.ts
-└── lib/
-    ├── filters.ts              # フィルタロジック
-    ├── google.ts               # Google OAuth 設定
-    ├── ai/                     # AI 要約・ヒートスコア
-    ├── prisma.ts               # Prisma singleton
-    └── utils.ts                # cn()
-
+  app/
+    page.tsx              # トップ。getEvents() → EventBrowser（ISR 10分）
+    events/[id]/page.tsx  # 個別イベントページ（OGP 付き）
+    api/cron/ingest/      # Vercel Cron から叩く取り込みエンドポイント
+  components/
+    timeline/FilterBar.tsx
+    ui/                   # shadcn 系 + Calendar
+  features/events/
+    components/           # EventBrowser / EventList / EventDetailPanel / LeftNav
+    hooks/useSavedEvents.ts
+    ingest/               # 取り込みコネクタ層
+    server/getEvents.ts   # Prisma → EventItem のマッピング
+    types/eventItem.ts    # EventItem と表示ラベル
+  hooks/useFilterState.ts # フィルタ状態と URL クエリの同期
+  lib/
+    calendarLink.ts       # Googleカレンダー URL / .ics 生成
+    filters.ts            # applyFilters / isExpired / 期間プリセット
 prisma/
-├── schema.prisma               # データモデル定義
-├── seed.ts                     # 初期データ
-└── dev.db                      # SQLite（開発用）
+  schema.prisma           # Event 単一モデル
+  seed.ts
 ```
 
----
+### 主要コンポーネント
 
-## データモデル
+- **`EventBrowser.tsx`** — 3ペインのレイアウトとステートのオーケストレーター。`GRID_OPEN` / `GRID_CLOSED` でグリッド幅を制御。viewMode（list / calendar / saved）、showExpired、selectedId、sortKey を保持。
+- **`LeftNav.tsx`** — ロゴ、今週のサマリ（7日以内に締切 / 今週開催 / 掲載件数）、ビュー切替、テーマ切替。
+- **`EventList.tsx`** — イベントカード一覧。アバター（主催者頭文字）/ タイトル・メタ情報 / 締切カウントダウンリング（SVG）。下部に締切までの進捗バー。
+- **`EventDetailPanel.tsx`** — 詳細ペイン。ヒーローに `DeadlineRing` と保存ボタン、Googleカレンダー追加、`.ics` ダウンロード。以下 Section で概要 / 開催情報 / 賞金・特典 / タグ / リンク。
+- **`FilterBar.tsx`** — 種別・形式・地域は共通の `MultiSelectDropdown` で描画。`useFilterState` と `applyFilters` を利用。
 
-```
-User ─────────┐
-              ├─── FavoriteCompany
-Company ──────┘
-  │
-  ├─── Post ────── AIAnalysis
-  ├─── Event
-  ├─── WikiEntry
-  ├─── ESDraft
-  ├─── Email
-  └─── CalendarEvent
+### データモデル（`prisma/schema.prisma`）
 
-NewsArticle（独立）
-JointEvent（合同説明会）
-```
+`Event` 単一モデル。主催者は文字列で持ち、企業テーブルは作らない。
 
-> 現在 UI は `src/features/dashboard/mock/radarItems.ts` のモックデータを参照。実データ化は `radarItems` を Prisma サーバーコンポーネントに置換するだけで完了する設計。
+- `url` が **冪等 upsert のキー**（同じ告知ページを何度取り込んでも重複しない）
+- `kind`（HACKATHON / CONTEST / INTERNSHIP / MEETUP / SEMINAR / OTHER）
+- `format`（ONLINE / OFFLINE / HYBRID）+ `prefecture` + `venue`
+- `startsAt` / `endsAt` / `applyDeadline` — カウントダウンは `applyDeadline ?? startsAt`
+- `prize` — ハッカソン・ビジコンでの主要な判断材料なので独立カラム
+- `ingestSource`（CONNPASS / DOORKEEPER / MANUAL）
 
----
+### イベント取り込み
 
-## デザインシステム
+`src/features/events/ingest/` にコネクタ層がある。
 
-yui540 さんを参考にさせていただきました。
+- `types.ts` — `NormalizedEvent` と `EventConnector`（`isEnabled()` / `fetchEvents()`）
+- `classify.ts` — タイトル・タグから `EventKind` / `EventFormat` を推定する純関数
+- `run.ts` — 有効なコネクタを走らせて `url` で upsert。`CONNECTORS` 配列に追加するだけで cron から呼ばれる
 
-| CSS 変数 | 値 | 用途 |
-|----------|----|------|
-| `--accent` | `hsl(26 54% 56%)` キャラメル | メインアクセント |
-| `--accent-2` | `hsl(14 70% 58%)` テラコッタ | グラデーション用 |
-| `--background` | `hsl(0 0% 100%)` | 背景 |
-| `--radius` | `14px` | 角丸の基準値 |
+**connpass API は申請・審査制**（個人・コミュニティは無償）。<https://help.connpass.com/api/> の利用申請フォームからキーを取得し、`CONNPASS_API_KEY` を設定する。未設定ならそのコネクタは `isEnabled()` が false を返してスキップされる。
 
-**アニメーションクラス：** `yui-fade-rise` / `yui-shine` / `yui-card` / `yui-ring-pulse` / `yui-heading` / `yui-pill`
+`vercel.json` の Cron が毎日 `/api/cron/ingest` を叩く（`CRON_SECRET` による Bearer 認証）。
 
----
+### スタイリング
 
-## 更新履歴
-
-| 日付 | 内容 |
-|------|------|
-| 2026-04-22 | 初期コミット・骨格構築 |
-| 2026-04-24 | 3ペイングリッド修正・AI分析プロファイルビュー追加 |
-| 2026-04-24 | 比較モード・認証情報保存・30社モックデータ追加 |
-| 2026-04-25 | お気に入り機能・会社情報拡充・yui540風デザイン刷新 |
-| 2026-04-25 | 独立スクロール・カード選択時トップ復帰・不要UI削除 |
-| 2026-04-26 | カレンダー機能：ワンクリック Google Calendar 追加・統合カレンダービュー |
-| 2026-04-27 | カレンダービューからも Google Calendar 追加ボタンを追加 |
+- Tailwind + CSS カスタムプロパティ（`src/app/globals.css`）
+  - `--accent: 26 54% 56%`（caramel）/ `--accent-2`（terracotta）/ `--accent-soft`
+  - `--radius: 14px`
+- yui540 風アニメーション群：`yui-fade-rise` / `yui-shine` / `yui-card` / `yui-ring-pulse` / `yui-heading`
+- カードは基本 `rounded-2xl border bg-background` + `yui-card` クラス
 
 ---
 
-## 関連リンク
+## デプロイ（Vercel + Neon）
 
-- GitHub: [404-Ryo/nextjs-app](https://github.com/404-Ryo/nextjs-app)
+1. [Neon](https://neon.tech) でプロジェクトを作り、pooled 接続（`DATABASE_URL`）と直接接続（`DIRECT_URL`）を取得する
+2. Vercel にリポジトリを接続し、環境変数を設定
+   - `DATABASE_URL` / `DIRECT_URL` / `CRON_SECRET` / `NEXT_PUBLIC_SITE_URL`
+   - （キー取得後）`CONNPASS_API_KEY`
+3. `npm run prisma:deploy` でマイグレーションを適用
+4. デプロイ
+
+`package.json` の `postinstall` で `prisma generate` が走るため、Vercel 側の追加設定は不要。
+
+`SITE_AUTH_PASSWORD` を設定すると全ページに Basic 認証がかかる（`src/middleware.ts`）。ステージング保護用で、一般公開時は未設定にする。

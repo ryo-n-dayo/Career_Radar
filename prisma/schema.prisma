@@ -1,351 +1,76 @@
-// Career Radar - Prisma schema (PostgreSQL)
+// イベント集約サイト - Prisma schema (PostgreSQL / Neon)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-enum PostSource {
-  X
-  INSTAGRAM
-  LINKEDIN
-  WEB
-}
-
-enum EventCategory {
-  INTERN
-  EARLY_SELECTION
+/// イベントの種別。取り込み時に classify.ts がタイトル・タグから推定する。
+enum EventKind {
+  HACKATHON
+  CONTEST
+  INTERNSHIP
+  MEETUP
   SEMINAR
-  FULL_TIME
-  INFO_SESSION
+  OTHER
 }
 
-enum EventStatus {
-  TODO
-  APPLIED
-  BOOKMARKED
-  DONE
-  MISSED
+enum EventFormat {
+  ONLINE
+  OFFLINE
+  HYBRID
 }
 
-enum ModerationStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
-model User {
-  id        String   @id @default(cuid())
-  email     String?  @unique
-  name      String?
-  imageUrl  String?
-
-  // Google integration
-  googleAccessToken  String?
-  googleRefreshToken String?
-  googleTokenExpiry  DateTime?
-
-  // Relations
-  posts     Post[]
-  events    Event[]
-  analyses  AIAnalysis[]
-  wiki      WikiEntry[]
-  esDrafts  ESDraft[]
-  favorites FavoriteCompany[]
-  emails    Email[]
-  calendarEvents CalendarEvent[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Company {
-  id           String  @id @default(cuid())
-  name         String
-  officialUrl  String?
-  careersUrl   String?
-  linkedinUrl  String?
-  xUrl         String?
-  instagramUrl String?
-  industry     String?
-
-  // CompanyProfile（会社概要・社風など）をそのまま保存
-  profile Json?
-
-  // Site monitoring
-  lastFetchedHash String?
-  lastFetchedAt   DateTime?
-
-  // Relations
-  posts               Post[]
-  events              Event[]
-  analyses            AIAnalysis[]
-  wiki                WikiEntry[]
-  esDrafts            ESDraft[]
-  favorites           FavoriteCompany[]
-  eventParticipations EventParticipant[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([name])
-}
-
-model Post {
-  id        String     @id @default(cuid())
-  userId    String
-  companyId String?
-
-  source    PostSource
-  url       String?
-  title     String?
-  content   String?
-  postedAt  DateTime?
-
-  // Optional ingestion metadata
-  externalId String? // e.g. tweet id / linkedin post id
-  author     String?
-
-  // AI-generated summary and matched keywords (for X imports)
-  aiSummary       String?
-  matchedKeywords Json?
-
-  // New-item flag (cleared when user marks-read)
-  isNew Boolean @default(true)
-
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
-
-  // Relations
-  sources Source[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([companyId, postedAt])
-  @@index([source])
-  @@index([userId, isNew, createdAt])
-  @@unique([source, externalId])
-}
-
-model Source {
-  id          String   @id @default(cuid())
-  postId      String
-  post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  type        String   // SourceType (enumはSQLiteで弱いので文字列で保持)
-  url         String
-  fetchedAt   DateTime @default(now())
-  
-  @@index([postId])
-  @@index([type])
-}
-
-model EventParticipant {
-  id        String @id @default(cuid())
-  eventId   String
-  companyId String
-  role      String @default("参加") // "主催" | "協賛" | "参加"
-
-  event   Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  @@unique([eventId, companyId])
-  @@index([eventId])
+/// どこから取り込んだか。MANUAL は seed / 手動登録。
+enum IngestSource {
+  CONNPASS
+  DOORKEEPER
+  MANUAL
 }
 
 model Event {
-  id        String        @id @default(cuid())
-  userId    String
-  companyId String?
+  id           String       @id @default(cuid())
+  /// 冪等 upsert のキー。イベント告知ページの URL。
+  url          String       @unique
+  externalId   String?
+  ingestSource IngestSource @default(MANUAL)
 
-  category  EventCategory
-  title     String
-  content   String?
-
-  // Scheduling & deadline
-  startsAt  DateTime?
-  endsAt    DateTime?
-  deadline  DateTime?
-
-  // RadarItem表示用（ダッシュボードの一覧・詳細パネルで直接使用）
-  deadlineLabel String? // "締切" | "早期選考" | "説明会"
-  aiHeat        Int?    // 0-100
-  keywords      Json?   // string[]
-  sources       Json?   // SourceInfo[]
-  trust         String  @default("needs_review") // "official" | "needs_review"
-
-  // Per-user status tracking
-  status    EventStatus   @default(TODO)
-
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
-
-  participants EventParticipant[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([companyId, deadline])
-  @@index([userId, status])
-}
-
-model AIAnalysis {
-  id        String   @id @default(cuid())
-  userId    String
-  companyId String
-
-  // Time-series friendly
-  analyzedAt DateTime @default(now())
-
-  heatScore  Int      // 0-100
-  summary    String?
-  // Persona / culture keywords
-  keywords   Json
-
-  // Link back to source context (optional)
-  sourcePostIds Json?
-
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([companyId, analyzedAt])
-  @@index([userId, companyId])
-}
-
-model WikiEntry {
-  id        String           @id @default(cuid())
-  userId    String
-  companyId String
-
-  title     String
-  content   String
-
-  // Moderation for user-generated content
-  moderationStatus ModerationStatus @default(PENDING)
-  moderatedAt      DateTime?
-  moderationNote   String?
-
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([companyId, createdAt])
-  @@index([moderationStatus])
-}
-
-model ESDraft {
-  id        String   @id @default(cuid())
-  userId    String
-  companyId String?
-
-  title     String
-  content   String
-
-  // Source citations (optional)
-  citedPostIds  Json?
-  citedEventIds Json?
-  citedWikiIds  Json?
-
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId, updatedAt])
-  @@index([companyId])
-}
-
-model FavoriteCompany {
-  id        String   @id @default(cuid())
-  userId    String
-  companyId String
-
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([userId, companyId])
-  @@index([companyId])
-}
-
-model Email {
-  id        String   @id @default(cuid())
-  userId    String
-
-  gmailId   String   @unique
-  from      String
-  to        String
-  subject   String
-  body      String
-  snippet   String?
-  timestamp DateTime
-
-  labels    Json?
-  isRead    Boolean  @default(false)
-  isStarred Boolean  @default(false)
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId, timestamp])
-  @@index([gmailId])
-}
-
-model CalendarEvent {
-  id        String   @id @default(cuid())
-  userId    String
-
-  googleEventId String  @unique
-  title     String
-  description String?
-  startTime DateTime
-  endTime   DateTime
-  location  String?
-
-  companyId String?
-
-  isAllDay  Boolean  @default(false)
-  attendees Json?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId, startTime])
-  @@index([googleEventId])
-}
-
-// ─── News ─────────────────────────────────────────────────
-model NewsArticle {
-  id          String   @id @default(cuid())
   title       String
-  summary     String
-  url         String   @unique
-  source      String   // "hatena" | "gnews" | "qiita" | "zenn"
-  category    String   // "CAREER_TIP" | "INTERNSHIP" | "COLUMN"
-  publishedAt DateTime
-  fetchedAt   DateTime @default(now())
-  isRead      Boolean  @default(false)
+  description String?
   imageUrl    String?
 
-  createdAt DateTime @default(now())
+  kind   EventKind
+  format EventFormat
+  /// オンライン開催では null
+  prefecture String?
+  venue      String?
 
-  @@index([publishedAt])
-  @@index([category])
-  @@index([isRead])
+  startsAt DateTime
+  endsAt   DateTime?
+  /// 応募・参加登録の締切。無い場合は startsAt をカウントダウンに使う。
+  applyDeadline DateTime?
+
+  /// 主催者名は文字列で保持する（企業テーブルは持たない）
+  organizer    String?
+  organizerUrl String?
+  /// 賞金・賞品。ハッカソン / ビジコンでの主要な判断材料。
+  prize String?
+  /// string[]
+  tags Json @default("[]")
+
+  capacity Int?
+  accepted Int?
+
+  fetchedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startsAt])
+  @@index([applyDeadline])
+  @@index([kind, startsAt])
 }

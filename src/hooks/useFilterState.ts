@@ -2,8 +2,8 @@
 
 import { useMemo, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { FilterState, ALL_CATEGORIES, Category } from "@/types/filter";
-import { SourceType, SOURCE_TYPES } from "@/types/source";
+import { FilterState, ALL_FORMATS, ALL_KINDS } from "@/types/filter";
+import type { EventFormat, EventKind } from "@/features/events/types/eventItem";
 import { parseDateParam, formatDateForParam } from "@/lib/filters";
 
 function parseSearchParams(searchParams: URLSearchParams): FilterState {
@@ -11,29 +11,33 @@ function parseSearchParams(searchParams: URLSearchParams): FilterState {
   const dateTo = parseDateParam(searchParams.get('to') || '');
   const datePreset = (searchParams.get('preset') as FilterState['datePreset']) || 'all';
 
-  const categoriesParam = searchParams.get('categories');
-  const categories = categoriesParam
-    ? (categoriesParam.split(',').filter(c => ALL_CATEGORIES.includes(c as Category)) as Category[])
+  const kindsParam = searchParams.get('kinds');
+  const kinds = kindsParam
+    ? (kindsParam.split(',').filter(k => ALL_KINDS.includes(k as EventKind)) as EventKind[])
     : [];
 
-  const sourcesParam = searchParams.get('sources');
-  const sources = sourcesParam
-    ? (sourcesParam.split(',').filter(s => SOURCE_TYPES.includes(s as SourceType)) as SourceType[])
+  const formatsParam = searchParams.get('formats');
+  const formats = formatsParam
+    ? (formatsParam.split(',').filter(f => ALL_FORMATS.includes(f as EventFormat)) as EventFormat[])
     : [];
+
+  const prefecturesParam = searchParams.get('pref');
+  const prefectures = prefecturesParam ? prefecturesParam.split(',').filter(Boolean) : [];
 
   return {
     dateFrom,
     dateTo,
     datePreset,
-    categories,
-    sources,
+    kinds,
+    formats,
+    prefectures,
     keyword: searchParams.get('q') || '',
   };
 }
 
 function filterToSearchParams(filter: FilterState): URLSearchParams {
   const params = new URLSearchParams();
-  
+
   if (filter.datePreset !== 'all') {
     params.set('preset', filter.datePreset);
   }
@@ -41,16 +45,19 @@ function filterToSearchParams(filter: FilterState): URLSearchParams {
     if (filter.dateFrom) params.set('from', formatDateForParam(filter.dateFrom));
     if (filter.dateTo) params.set('to', formatDateForParam(filter.dateTo));
   }
-  if (filter.categories.length > 0) {
-    params.set('categories', filter.categories.join(','));
+  if (filter.kinds.length > 0) {
+    params.set('kinds', filter.kinds.join(','));
   }
-  if (filter.sources.length > 0) {
-    params.set('sources', filter.sources.join(','));
+  if (filter.formats.length > 0) {
+    params.set('formats', filter.formats.join(','));
+  }
+  if (filter.prefectures.length > 0) {
+    params.set('pref', filter.prefectures.join(','));
   }
   if (filter.keyword) {
     params.set('q', filter.keyword);
   }
-  
+
   return params;
 }
 
@@ -66,8 +73,9 @@ export function useFilterState() {
 
   const isFiltered =
     filter.datePreset !== 'all' ||
-    filter.categories.length > 0 ||
-    filter.sources.length > 0 ||
+    filter.kinds.length > 0 ||
+    filter.formats.length > 0 ||
+    filter.prefectures.length > 0 ||
     filter.keyword !== '';
 
   const updateFilter = useCallback((updates: Partial<FilterState>) => {

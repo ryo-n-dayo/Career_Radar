@@ -24,9 +24,8 @@ export interface CalendarEvent {
   startTime: Date;
   endTime: Date;
   location?: string;
-  companyId?: string;
+  /** EVENT_KIND_LABEL の値（「ハッカソン」など）。凡例と色分けに使う。 */
   category?: string;
-  isFromGoogle?: boolean;
 }
 
 interface CalendarProps {
@@ -36,12 +35,12 @@ interface CalendarProps {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
+  "ハッカソン": "bg-violet-100 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300",
+  "コンテスト": "bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300",
   "インターン": "bg-sky-100 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300",
-  "早期選考":   "bg-[hsl(var(--accent))]/15 text-[hsl(var(--accent))]",
-  "セミナー":   "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300",
-  "本選考":     "bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300",
-  "説明会":     "bg-violet-100 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300",
-  "google":    "bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300",
+  "勉強会":     "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300",
+  "セミナー":   "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-200",
+  "その他":     "bg-muted text-muted-foreground",
 };
 
 const DAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
@@ -86,16 +85,11 @@ export function Calendar({ events = [], onDateSelect, selectedDate }: CalendarPr
 
       {/* ─── 凡例 ─── */}
       <div className="flex flex-wrap gap-1.5">
-        {Object.entries(CATEGORY_COLORS)
-          .filter(([k]) => k !== "google")
-          .map(([cat, cls]) => (
-            <span key={cat} className={cn("yui-pill px-2 py-0.5 text-[10px] font-medium", cls)}>
-              {cat}
-            </span>
-          ))}
-        <span className={cn("yui-pill px-2 py-0.5 text-[10px] font-medium", CATEGORY_COLORS.google)}>
-          Googleカレンダー
-        </span>
+        {Object.entries(CATEGORY_COLORS).map(([cat, cls]) => (
+          <span key={cat} className={cn("yui-pill px-2 py-0.5 text-[10px] font-medium", cls)}>
+            {cat}
+          </span>
+        ))}
       </div>
 
       {/* ─── 曜日ヘッダー ─── */}
@@ -159,8 +153,7 @@ export function Calendar({ events = [], onDateSelect, selectedDate }: CalendarPr
               {/* イベントバッジ（最大2件） */}
               <div className="space-y-0.5">
                 {dayEvents.slice(0, 2).map((ev) => {
-                  const colorKey = ev.isFromGoogle ? "google" : (ev.category ?? "");
-                  const colorCls = CATEGORY_COLORS[colorKey] ?? "bg-muted text-muted-foreground";
+                  const colorCls = CATEGORY_COLORS[ev.category ?? ""] ?? "bg-muted text-muted-foreground";
                   return (
                     <div
                       key={ev.id}
@@ -189,36 +182,31 @@ export function Calendar({ events = [], onDateSelect, selectedDate }: CalendarPr
           </h4>
           <div className="space-y-2">
             {getEventsForDate(selectedDate).map((ev) => {
-              const colorKey = ev.isFromGoogle ? "google" : (ev.category ?? "");
-              const colorCls = CATEGORY_COLORS[colorKey] ?? "bg-muted text-muted-foreground";
+              const colorCls = CATEGORY_COLORS[ev.category ?? ""] ?? "bg-muted text-muted-foreground";
               return (
                 <div
                   key={ev.id}
                   className="flex items-center gap-3 rounded-xl border border-border bg-muted/20 p-3"
                 >
                   <span className={cn("yui-pill shrink-0 px-2 py-0.5 text-[10px] font-medium", colorCls)}>
-                    {ev.isFromGoogle ? "Google" : ev.category}
+                    {ev.category}
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-medium">{ev.title}</div>
                     <div className="mt-0.5 text-[11px] text-muted-foreground">
-                      {ev.isFromGoogle
-                        ? `${format(new Date(ev.startTime), "HH:mm")} – ${format(new Date(ev.endTime), "HH:mm")}`
-                        : format(new Date(ev.startTime), "yyyy-MM-dd")}
+                      {format(new Date(ev.startTime), "yyyy-MM-dd HH:mm")}
                       {ev.location && ` @ ${ev.location}`}
                     </div>
                   </div>
-                  {!ev.isFromGoogle && (
-                    <a
-                      href={buildGoogleCalendarUrl(ev)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-border bg-background px-2.5 py-1.5 text-[11px] font-medium text-foreground transition hover:border-[hsl(var(--accent))]/60 hover:bg-[hsl(var(--accent))]/5"
-                    >
-                      <span>📅</span>
-                      <span>追加</span>
-                    </a>
-                  )}
+                  <a
+                    href={buildGoogleCalendarUrl(ev)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-border bg-background px-2.5 py-1.5 text-[11px] font-medium text-foreground transition hover:border-[hsl(var(--accent))]/60 hover:bg-[hsl(var(--accent))]/5"
+                  >
+                    <span>📅</span>
+                    <span>追加</span>
+                  </a>
                 </div>
               );
             })}

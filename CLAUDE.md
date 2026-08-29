@@ -3,24 +3,27 @@
 このファイルは Claude Code（claude.ai/code）がこのリポジトリで作業する際のガイドです。
 実装前に必ずplanモードで設計を出してから書け
 変更や実行したことは要約してobsisianに保存（user/nishikawaryo)にある
+
 ## プロジェクト概要
 
-**Career Radar** — 就活情報を一元管理する Next.js アプリ。企業の採用イベント・説明会・選考情報を「メインDB」として集約し、締切カウントダウン・AI 要約・Xポスト取り込み・Googleカレンダー連携を提供する。
+**Event Radar** — ハッカソン・ビジネスコンテスト・企業主催イベントの募集情報を集約する Next.js アプリ。方々に散らばっている告知を一箇所に集め、締切カウントダウン・フィルタ・カレンダー連携を提供する。
 
-- 3ペイン構成のダッシュボード（左：ナビ / 中央：一覧 / 右：詳細）
+- **ログイン不要の公開サイト**。保存（★）は localStorage のみで、ユーザーテーブルを持たない
+- 3ペイン構成（左：ナビ / 中央：一覧 / 右：詳細）
 - オレンジアクセント（caramel）× クリーム背景の yui540 風デザイン
-- モック + Prisma バックエンド混在（現状 `radarItems` モックが中心）
+- Vercel + Neon (PostgreSQL) を前提
 
 ## よく使うコマンド
 
 ```bash
 npm run dev            # 開発サーバー起動
-npm run build          # 本番ビルド
-npm run lint           # ESLint
+npm run build          # 本番ビルド（DATABASE_URL が必要）
+npm run lint           # ESLint（flat config なので next lint ではなく eslint を直接叩く）
 npm run test           # Vitest 実行（単発）
 npm run test:watch     # Vitest watch
 npm run prisma:generate
-npm run prisma:migrate # マイグレーション
+npm run prisma:migrate # 開発用マイグレーション
+npm run prisma:deploy  # 本番マイグレーション適用
 npm run prisma:studio  # Prisma Studio
 npm run db:seed        # prisma/seed.ts を実行
 ```
@@ -30,41 +33,56 @@ npm run db:seed        # prisma/seed.ts を実行
 ### ディレクトリ構成
 ```
 src/
-  app/             # Next.js App Router（page.tsx / api/ ルート）
-  components/      # 汎用 UI（shadcn 系 + timeline/ 配下）
-  features/
-    dashboard/     # ダッシュボード本体（当アプリのコア）
-      components/  # LeftNav / RadarTable / RightDetailPanel / ThreePaneDashboard など
-      mock/        # radarItems モックデータ
-      types/       # RadarItem / CompanyProfile 型定義
-  hooks/           # useFilterState など
-  lib/             # filters, utils（cn）
-  types/           # source など共通型
+  app/
+    page.tsx              # トップ。getEvents() → EventBrowser（ISR revalidate 600）
+    events/[id]/page.tsx  # 個別イベントページ（generateMetadata で OGP）
+    api/cron/ingest/      # Vercel Cron 用の取り込みエンドポイント
+  components/
+    timeline/FilterBar.tsx
+    ui/                   # shadcn 系 + Calendar
+  features/events/
+    components/           # EventBrowser / EventList / EventDetailPanel / LeftNav
+    hooks/useSavedEvents.ts
+    ingest/               # 取り込みコネクタ層（types / classify / run）
+    server/getEvents.ts
+    types/eventItem.ts
+  hooks/useFilterState.ts
+  lib/                    # calendarLink, filters, prisma, utils
 prisma/
-  schema.prisma    # Post / Event / Company / AIAnalysis / ESDraft
+  schema.prisma           # Event 単一モデル
+  seed.ts                 # デモ用サンプルイベント
 ```
 
 ### 主要コンポーネント
-- **`ThreePaneDashboard.tsx`** — レイアウトとステートのオーケストレーター。`GRID_OPEN` / `GRID_CLOSED` でグリッド幅を制御。viewMode（db/calendar）、savedOnly、compareMode、selectedId を保持。
-- **`LeftNav.tsx`** — ロゴ、今週のサマリ（7日以内／合計）、Google連携、取り込み、テーマ切替。独立スクロール対応。
-- **`RadarTable.tsx`** — 企業カード一覧。カードは「アバター（頭文字 + カラー）/ 中央情報 / 右カテゴリ + 締切カウントダウンリング（SVG）」構成。下部に締切までの進捗バー。カード選択時に自動スクロールトップ。比較チェックボックス付き。
-- **`RightDetailPanel.tsx`** — 詳細ペイン。ヒーローに `DeadlineRing`（大きめ SVG）と「保存済み」ボタン、以下 Section で社風キーワード／ソース／会社情報／Wiki／X口コミ等。`CredentialsSection` を含む。
-- **`CompareDialog.tsx`** — 最大3社を並べて比較するモーダル。`compareMode` フラグと `compareIds[]` で制御。
-- **`CredentialsSection.tsx`** — マイナビ・リクナビ等のID/PWをlocalStorageに保存するセクション（`useCompanyCredentials` フック使用）。
-- **`FilterBar.tsx`** — 期間 / カテゴリ / ソース / キーワード。`useFilterState` と `applyFilters` を利用。
+- **`EventBrowser.tsx`** — レイアウトとステートのオーケストレーター。`GRID_OPEN` / `GRID_CLOSED` でグリッド幅を制御。viewMode（list/calendar/saved）、showExpired、selectedId、sortKey、isRightOpen を保持。
+- **`LeftNav.tsx`** — ロゴ、今週のサマリ（7日以内に締切／今週開催／掲載件数）、ビュー切替、テーマ切替。`ViewMode` 型のエクスポート元。
+- **`EventList.tsx`** — イベントカード一覧。カードは「アバター（主催者頭文字 + カラー）/ 中央情報 / 右：種別チップ + 締切カウントダウンリング（SVG）」構成。下部に締切までの進捗バー。カード選択時に自動スクロールトップ。
+- **`EventDetailPanel.tsx`** — 詳細ペイン。ヒーローに `DeadlineRing`・Googleカレンダー追加・`.ics`・保存ボタン。以下 Section で概要／開催情報／賞金・特典／タグ／リンク。
+- **`FilterBar.tsx`** — 期間 / 種別 / 形式 / 地域 / キーワード。種別・形式・地域は共通の `MultiSelectDropdown` で描画する（3つ別々に書かない）。
 
 ### カスタムフック
-- **`useCompanyCredentials`** (`features/dashboard/hooks/`) — 採用サービスのログイン情報をlocalStorageに暗号化せず保存。**本番化時は要セキュリティ見直し**。
+- **`useSavedEvents`** (`features/events/hooks/`) — 保存済み id を localStorage に永続化。SSR とのハイドレーション不一致を避けるため初期値は空集合で、マウント後に読み込む。
 - **`useFilterState`** (`hooks/`) — URLクエリパラメータとフィルタ状態を同期。
 
 ### データモデル（`prisma/schema.prisma`）
-- `Post` — ソーシャル／Web取り込み。AI 要約・キーワード・isNew を持つ。
-- `Event` — category（INTERN/SEMINAR/EARLY/MAIN/INFO）+ deadline + status（TODO/APPLIED/BOOKMARKED）。
-- `Company` — 会社情報、URL、サイト監視ハッシュ。
-- `AIAnalysis` — heatScore(0-100)、要約、キーワード。
-- `ESDraft` — ES下書き + 引用（Post/Event/Wiki）。
 
-現状 UI は `src/features/dashboard/mock/radarItems.ts` の `RadarItem[]` を使用（30社分の実企業データを収録済み）。`RadarItem` は Event + AIAnalysis + CompanyProfile を統合した表示用型（`src/features/dashboard/types/radarItem.ts`）。
+`Event` 単一モデルのみ。主催者は文字列で保持し、企業テーブルは作らない。
+
+- `url` が **`@unique` かつ冪等 upsert のキー**。取り込みは必ず url で upsert する
+- `kind`：`HACKATHON | CONTEST | INTERNSHIP | MEETUP | SEMINAR | OTHER`
+- `format`：`ONLINE | OFFLINE | HYBRID`（`prefecture` はオンライン時 null）
+- `startsAt` / `endsAt` / `applyDeadline` — **カウントダウンは常に `applyDeadline ?? startsAt`**（`countdownTarget()` を使う）
+- `prize` — ハッカソン・ビジコンの主要な判断材料なので独立カラム
+- `ingestSource`：`CONNPASS | DOORKEEPER | MANUAL`
+
+### イベント取り込み
+
+`src/features/events/ingest/`:
+- `types.ts` — `NormalizedEvent` / `EventConnector`（`isEnabled()` / `fetchEvents()`）/ `ConnectorResult`
+- `classify.ts` — タイトル・タグから `EventKind` / `EventFormat` を推定する純関数。**ここは必ずテストを伴って変更する**
+- `run.ts` — `CONNECTORS` 配列を走らせて url で upsert。コネクタを実装したらこの配列に追加する
+
+**connpass API v2 のキーは申請・審査制**（個人・コミュニティは無償）。`CONNPASS_API_KEY` 未設定ならコネクタは `isEnabled()` が false を返してスキップされるので、キー未取得でもアプリは動く。
 
 ### スタイリング
 - Tailwind + CSS カスタムプロパティ（`src/app/globals.css`）
@@ -75,20 +93,21 @@ prisma/
 
 ## 開発上の注意
 
-- **エディタで UI を変更したら** Claude Code のプレビューサーバーで必ず `preview_screenshot` 確認（3ペインが崩れやすい）。
-- **新規ページ追加**よりも **既存コンポーネント（特に `ThreePaneDashboard` / `RadarTable` / `RightDetailPanel`）の拡張**を優先。
-- モック差し替え：実データ化するときは `radarItems` を Prisma 経由のサーバーコンポーネントに置換し、`RadarItem` 型へマップ。
-- Google連携は `/api/auth/google` → `googleapis`。Gmail/Calendar 同期 API も `src/app/api/` 下。
+- **エディタで UI を変更したら** プレビューサーバーでスクリーンショット確認（3ペインが崩れやすい）。
+- **新規ページ追加**よりも **既存コンポーネント（特に `EventBrowser` / `EventList` / `EventDetailPanel`）の拡張**を優先。
+- **ログインを前提にしない**。ユーザー単位の状態が必要になったら、まず localStorage で足りないかを検討する。
+- Google カレンダー連携は **OAuth を使わない**。`src/lib/calendarLink.ts` の `googleCalendarUrl()` / `buildIcs()` でリンクを生成するだけ。
 - テーマは `document.documentElement` の `.dark` クラス + `localStorage.theme`。`LeftNav` が制御。
 - 色の追加は必ず `globals.css` の CSS 変数 or Tailwind のパレット（`orange-*` など）経由で。ハードコード値は避ける。
+- `npm run lint` は `eslint` を直接叩く。`next lint` は flat config（`eslint.config.mjs`）と噛み合わず対話プロンプトで止まる。
 
 ## 型規約
 
-- `RadarItem["category"]`：`"インターン" | "早期選考" | "セミナー" | "本選考" | "説明会"`
-- `RadarItem["deadlineLabel"]`：`"締切" | "早期選考" | "説明会"`
-- `Trust`：`"official" | "needs_review"`
+- 表示用の型は `EventItem`（`src/features/events/types/eventItem.ts`）。日付は **ISO 文字列**で持つ（サーバーコンポーネント境界を越えるため）
+- 日本語ラベルは `EVENT_KIND_LABEL` / `EVENT_FORMAT_LABEL` / `INGEST_SOURCE_LABEL` を使う。文字列リテラルを直書きしない
+- 開催地の表示は `locationLabel()`、締切基準日は `countdownTarget()` を使う
 
 ## テスト
 
 - Vitest（`vitest.config.ts`）。`src/**/__tests__/*.test.ts(x)` 形式。
-- UI テストは最小限。ロジック（filters, hooks）中心に追加する方針。
+- UI テストは最小限。ロジック（`classify`, `filters`, hooks）中心に追加する方針。

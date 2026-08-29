@@ -1,31 +1,32 @@
 import { FilterState } from '@/types/filter';
-import { SourceType } from '@/types/source';
-import { RadarItem } from '@/features/dashboard/types/radarItem';
+import { countdownTarget, type EventItem } from '@/features/events/types/eventItem';
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 
-export function applyFilters(posts: RadarItem[], filter: FilterState): RadarItem[] {
+export function applyFilters(events: EventItem[], filter: FilterState): EventItem[] {
   const keyword = filter.keyword.toLowerCase();
 
-  return posts.filter(post => {
+  return events.filter(event => {
     if (filter.dateFrom || filter.dateTo) {
-      const postDate = new Date(post.date);
-      if (filter.dateFrom && postDate < filter.dateFrom) return false;
-      if (filter.dateTo && postDate > filter.dateTo) return false;
+      const eventDate = new Date(event.startsAt);
+      if (filter.dateFrom && eventDate < filter.dateFrom) return false;
+      if (filter.dateTo && eventDate > filter.dateTo) return false;
     }
 
-    if (filter.categories.length > 0 && !filter.categories.includes(post.category)) {
+    if (filter.kinds.length > 0 && !filter.kinds.includes(event.kind)) {
       return false;
     }
 
-    if (filter.sources.length > 0) {
-      const hasMatch = post.sources.some(s =>
-        filter.sources.includes(s.type as SourceType)
-      );
-      if (!hasMatch) return false;
+    if (filter.formats.length > 0 && !filter.formats.includes(event.format)) {
+      return false;
+    }
+
+    if (filter.prefectures.length > 0) {
+      // オンライン専用イベントは開催地を持たないので地域指定時は除外する
+      if (!event.prefecture || !filter.prefectures.includes(event.prefecture)) return false;
     }
 
     if (keyword) {
-      const text = `${post.companyName} ${post.content} ${post.keywords.join(' ')}`.toLowerCase();
+      const text = `${event.title} ${event.description ?? ''} ${event.organizer ?? ''} ${event.tags.join(' ')}`.toLowerCase();
       if (!text.includes(keyword)) return false;
     }
 
@@ -33,8 +34,9 @@ export function applyFilters(posts: RadarItem[], filter: FilterState): RadarItem
   });
 }
 
-export function isExpired(date: string): boolean {
-  return new Date(date) < startOfDay(new Date());
+/** 募集が締め切られた（もしくは開催済みの）イベントか */
+export function isExpired(event: EventItem): boolean {
+  return countdownTarget(event) < startOfDay(new Date());
 }
 
 export function resolveDatePreset(preset: string): { from: Date | null; to: Date | null } {
