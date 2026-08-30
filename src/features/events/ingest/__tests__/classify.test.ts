@@ -30,6 +30,16 @@ describe("classifyKind", () => {
     expect(classifyKind({ title: "TechDay 2026", tags: ["hackathon", "student"] })).toBe("HACKATHON");
   });
 
+  it("マイナビの仕事体験系をインターンに寄せる", () => {
+    expect(classifyKind({ title: "セキュリティエンジニア　ワンデー仕事体験" })).toBe("INTERNSHIP");
+    expect(classifyKind({ title: "実務型プログラム", tags: ["仕事体験", "実務型", "WEB開催"] })).toBe("INTERNSHIP");
+  });
+
+  it("オープン・カンパニーは説明会側に寄せる", () => {
+    expect(classifyKind({ title: "【オープン・カンパニー】企業がよくわかる！企業理解プログラム" })).toBe("SEMINAR");
+    expect(classifyKind({ title: "オープンカンパニー 2028" })).toBe("SEMINAR");
+  });
+
   it("手がかりが無ければ OTHER", () => {
     expect(classifyKind({ title: "定例ミーティング" })).toBe("OTHER");
   });
@@ -54,5 +64,21 @@ describe("classifyFormat", () => {
 
   it("実会場のみなら OFFLINE", () => {
     expect(classifyFormat({ venue: "渋谷ヒカリエ 11F" })).toBe("OFFLINE");
+  });
+
+  it("会場欄が空でも説明文のオンライン表記を拾う", () => {
+    expect(
+      classifyFormat({ title: "第169回 勉強会", description: "## 場所 オンライン会場： Zoom 会場" })
+    ).toBe("ONLINE");
+  });
+
+  it("実会場があり説明文にオンライン表記があれば HYBRID", () => {
+    expect(
+      classifyFormat({ venue: "渋谷ヒカリエ 11F", description: "オンライン配信も行います" })
+    ).toBe("HYBRID");
+  });
+
+  it("マイナビの WEB開催 タグを ONLINE として拾う", () => {
+    expect(classifyFormat({ title: "ワンデー仕事体験", tags: ["仕事体験", "実務型", "WEB開催"] })).toBe("ONLINE");
   });
 });

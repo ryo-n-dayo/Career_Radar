@@ -1,45 +1,15 @@
-import { prisma } from "@/lib/prisma";
-import type { ConnectorResult, EventConnector, NormalizedEvent } from "./types";
+import type { ConnectorResult, EventConnector } from "./types";
+import { upsertEvent } from "./upsert";
 
 /**
  * 登録済みのコネクタ。
  * connpass の API キーは申請・審査制のため、キーが手に入るまでここは空のまま。
  * コネクタを実装したらこの配列に追加すれば cron から呼ばれるようになる。
+ *
+ * マイナビ / X は自動取り込みが成立しない（robots.txt / API 費用）ため、
+ * 管理画面の手動登録（/admin/new）から入る。
  */
 export const CONNECTORS: EventConnector[] = [];
-
-async function upsertEvent(event: NormalizedEvent): Promise<"created" | "updated"> {
-  const data = {
-    externalId: event.externalId ?? null,
-    ingestSource: event.ingestSource,
-    title: event.title,
-    description: event.description ?? null,
-    imageUrl: event.imageUrl ?? null,
-    kind: event.kind,
-    format: event.format,
-    prefecture: event.prefecture ?? null,
-    venue: event.venue ?? null,
-    startsAt: event.startsAt,
-    endsAt: event.endsAt ?? null,
-    applyDeadline: event.applyDeadline ?? null,
-    organizer: event.organizer ?? null,
-    organizerUrl: event.organizerUrl ?? null,
-    prize: event.prize ?? null,
-    tags: event.tags,
-    capacity: event.capacity ?? null,
-    accepted: event.accepted ?? null,
-    fetchedAt: new Date()
-  };
-
-  const existing = await prisma.event.findUnique({ where: { url: event.url }, select: { id: true } });
-  await prisma.event.upsert({
-    where: { url: event.url },
-    create: { url: event.url, ...data },
-    update: data
-  });
-
-  return existing ? "updated" : "created";
-}
 
 /**
  * 有効なコネクタを順に走らせ、url をキーに冪等 upsert する。

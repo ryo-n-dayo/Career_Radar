@@ -29,11 +29,28 @@ const KIND_PATTERNS: Array<{ kind: EventKind; patterns: RegExp[] }> = [
   },
   {
     kind: "INTERNSHIP",
-    patterns: [/インターン/, /internship/i, /就業体験/, /1day仕事体験/i]
+    patterns: [
+      /インターン/,
+      /internship/i,
+      /就業体験/,
+      /仕事体験/, // マイナビの「ワンデー仕事体験」「実務型仕事体験」を拾う
+      /実務型/
+    ]
   },
   {
     kind: "SEMINAR",
-    patterns: [/セミナー/, /説明会/, /講演/, /webinar/i, /seminar/i, /カンファレンス/, /conference/i]
+    patterns: [
+      /セミナー/,
+      /説明会/,
+      /講演/,
+      /webinar/i,
+      /seminar/i,
+      /カンファレンス/,
+      /conference/i,
+      // マイナビの区分。就業体験を伴わず企業理解が目的なので説明会側に寄せる
+      /オープン[・･]?カンパニー/,
+      /企業理解/
+    ]
   },
   {
     kind: "MEETUP",
@@ -56,15 +73,22 @@ export function classifyKind(input: { title: string; tags?: string[]; descriptio
   return "OTHER";
 }
 
-const ONLINE_PATTERNS = [/オンライン/, /online/i, /zoom/i, /リモート/, /discord/i, /配信/];
+const ONLINE_PATTERNS = [/オンライン/, /online/i, /zoom/i, /リモート/, /discord/i, /配信/, /WEB開催/i, /Web開催/];
 
 /**
  * 会場文字列から開催形式を推定する。
  * オンラインを示す語と実会場の両方が出てくる場合はハイブリッド扱いにする。
+ * connpass のように会場欄が空で本文にだけ「オンライン会場: Zoom」と書く例があるため、
+ * description も判定材料に含める。
  */
-export function classifyFormat(input: { venue?: string; title?: string; tags?: string[] }): EventFormat {
+export function classifyFormat(input: {
+  venue?: string;
+  title?: string;
+  tags?: string[];
+  description?: string;
+}): EventFormat {
   const venue = input.venue?.trim() ?? "";
-  const haystack = [venue, input.title ?? "", ...(input.tags ?? [])].join(" ");
+  const haystack = [venue, input.title ?? "", input.description ?? "", ...(input.tags ?? [])].join(" ");
   const mentionsOnline = ONLINE_PATTERNS.some((pattern) => pattern.test(haystack));
 
   if (!venue) return mentionsOnline ? "ONLINE" : "OFFLINE";

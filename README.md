@@ -24,6 +24,7 @@
 | **保存** | ★ で保存、「保存済み」ビューで一覧。localStorage のみ |
 | **カレンダー連携** | Googleカレンダー追加リンク / `.ics` ダウンロード。OAuth 不要 |
 | **個別ページ** | `/events/[id]` に OGP 付きの共有用ページ |
+| **手動登録（管理者）** | `/admin` から URL を貼るだけで登録。ブックマークレットで X・マイナビのページから1クリック |
 
 ---
 
@@ -64,19 +65,23 @@ src/
     page.tsx              # トップ。getEvents() → EventBrowser（ISR 10分）
     events/[id]/page.tsx  # 個別イベントページ（OGP 付き）
     api/cron/ingest/      # Vercel Cron から叩く取り込みエンドポイント
+    admin/                # 管理画面（手動登録 / ブックマークレット）
+    api/admin/            # preview（URL からメタ取得）/ events（登録・削除）
   components/
     timeline/FilterBar.tsx
     ui/                   # shadcn 系 + Calendar
   features/events/
     components/           # EventBrowser / EventList / EventDetailPanel / LeftNav
+      admin/              # EventForm / EventAdminList / BookmarkletLink
     hooks/useSavedEvents.ts
-    ingest/               # 取り込みコネクタ層
+    ingest/               # 取り込み層（コネクタ + 手動登録の共通 upsert）
     server/getEvents.ts   # Prisma → EventItem のマッピング
     types/eventItem.ts    # EventItem と表示ラベル
   hooks/useFilterState.ts # フィルタ状態と URL クエリの同期
   lib/
     calendarLink.ts       # Googleカレンダー URL / .ics 生成
     filters.ts            # applyFilters / isExpired / 期間プリセット
+    metadata/             # fetchPageMeta（取得）/ parsePageMeta（OGP・JSON-LD 抽出）
 prisma/
   schema.prisma           # Event 単一モデル
   seed.ts
@@ -99,7 +104,7 @@ prisma/
 - `format`（ONLINE / OFFLINE / HYBRID）+ `prefecture` + `venue`
 - `startsAt` / `endsAt` / `applyDeadline` — カウントダウンは `applyDeadline ?? startsAt`
 - `prize` — ハッカソン・ビジコンでの主要な判断材料なので独立カラム
-- `ingestSource`（CONNPASS / DOORKEEPER / MANUAL）
+- `ingestSource`（CONNPASS / DOORKEEPER / MYNAVI / X / MANUAL）— 登録 URL のホスト名から自動判定
 
 ### イベント取り込み
 
@@ -112,6 +117,26 @@ prisma/
 **connpass API は申請・審査制**（個人・コミュニティは無償）。<https://help.connpass.com/api/> の利用申請フォームからキーを取得し、`CONNPASS_API_KEY` を設定する。未設定ならそのコネクタは `isEnabled()` が false を返してスキップされる。
 
 `vercel.json` の Cron が毎日 `/api/cron/ingest` を叩く（`CRON_SECRET` による Bearer 認証）。
+
+### 手動登録（マイナビ・X）
+
+マイナビと X は自動取り込みができない。
+
+- **X** — 2026年2月に API の無料枠が廃止。全文検索は Enterprise 契約（月 $42,000〜）
+- **マイナビ** — sitemap の URL は 302 スタブで、リダイレクト先はクエリ文字列付き。robots.txt の `Disallow: /*?` に該当するためクローラでの巡回は不可
+
+そこで `/admin` に管理者向けの手動登録を用意している。
+
+| 入口 | 使い方 |
+|---|---|
+| `/admin/new` | 告知ページの URL を貼って「取得」→ OGP / JSON-LD から分かる範囲を前埋め → 確認して登録 |
+| `/admin/bookmarklet` | ブックマークレットをブックマークバーに置き、X やマイナビのページ上でクリック → 登録フォームが開く |
+
+ブックマークレットは**自分のブラウザで開いているページの DOM を読むだけ**で、サーバーからページを取得しない。
+
+`url` が冪等キーなので、同じページを二度登録しても重複しない。`ingestSource` は URL のホスト名から自動判定する。
+
+**概要は 200 文字で保存される**（`DESCRIPTION_MAX_LENGTH`）。告知本文をそのまま複製して再配信しないための制限で、詳細は必ず元ページへのリンクで見せる。
 
 ### スタイリング
 
@@ -128,10 +153,14 @@ prisma/
 1. [Neon](https://neon.tech) でプロジェクトを作り、pooled 接続（`DATABASE_URL`）と直接接続（`DIRECT_URL`）を取得する
 2. Vercel にリポジトリを接続し、環境変数を設定
    - `DATABASE_URL` / `DIRECT_URL` / `CRON_SECRET` / `NEXT_PUBLIC_SITE_URL`
+   - `ADMIN_PASSWORD`（管理画面を使う場合。未設定だと `/admin` は 404）
    - （キー取得後）`CONNPASS_API_KEY`
 3. `npm run prisma:deploy` でマイグレーションを適用
 4. デプロイ
 
 `package.json` の `postinstall` で `prisma generate` が走るため、Vercel 側の追加設定は不要。
 
-`SITE_AUTH_PASSWORD` を設定すると全ページに Basic 認証がかかる（`src/middleware.ts`）。ステージング保護用で、一般公開時は未設定にする。
+`src/middleware.ts` は2層になっている。
+
+- `ADMIN_PASSWORD` — `/admin` と `/api/admin` の Basic 認証。**未設定なら 404 を返して機能ごと無効化する**（設定漏れで管理画面が露出しないように、401 ではなく 404）
+- `SITE_AUTH_PASSWORD` — サイト全体の Basic 認証。ステージング保護用で、一般公開時は未設定にする

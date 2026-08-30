@@ -37,17 +37,21 @@ src/
     page.tsx              # トップ。getEvents() → EventBrowser（ISR revalidate 600）
     events/[id]/page.tsx  # 個別イベントページ（generateMetadata で OGP）
     api/cron/ingest/      # Vercel Cron 用の取り込みエンドポイント
+    admin/                # 管理画面（手動登録・ブックマークレット）
+    api/admin/            # preview（URLからメタ取得）/ events（登録・削除）
   components/
     timeline/FilterBar.tsx
     ui/                   # shadcn 系 + Calendar
   features/events/
     components/           # EventBrowser / EventList / EventDetailPanel / LeftNav
+      admin/              # EventForm / EventAdminList / BookmarkletLink
     hooks/useSavedEvents.ts
-    ingest/               # 取り込みコネクタ層（types / classify / run）
+    ingest/               # 取り込み層（types / classify / run / upsert / parseEventInput）
     server/getEvents.ts
     types/eventItem.ts
   hooks/useFilterState.ts
   lib/                    # calendarLink, filters, prisma, utils
+    metadata/             # fetchPageMeta（取得）/ parsePageMeta（OGP・JSON-LD 抽出）
 prisma/
   schema.prisma           # Event 単一モデル
   seed.ts                 # デモ用サンプルイベント
@@ -73,7 +77,7 @@ prisma/
 - `format`：`ONLINE | OFFLINE | HYBRID`（`prefecture` はオンライン時 null）
 - `startsAt` / `endsAt` / `applyDeadline` — **カウントダウンは常に `applyDeadline ?? startsAt`**（`countdownTarget()` を使う）
 - `prize` — ハッカソン・ビジコンの主要な判断材料なので独立カラム
-- `ingestSource`：`CONNPASS | DOORKEEPER | MANUAL`
+- `ingestSource`：`CONNPASS | DOORKEEPER | MYNAVI | X | MANUAL`（登録 URL のホスト名から `ingestSourceFromUrl()` で判定）
 
 ### イベント取り込み
 
@@ -82,7 +86,19 @@ prisma/
 - `classify.ts` — タイトル・タグから `EventKind` / `EventFormat` を推定する純関数。**ここは必ずテストを伴って変更する**
 - `run.ts` — `CONNECTORS` 配列を走らせて url で upsert。コネクタを実装したらこの配列に追加する
 
+- `upsert.ts` — url を冪等キーにした upsert。**コネクタと手動登録の両方がここを通る**
+- `parseEventInput.ts` — 管理 API に来た生 JSON を `NormalizedEvent` に落とす。**upsertEvent を直接呼ばずここを必ず経由する**
+
 **connpass API v2 のキーは申請・審査制**（個人・コミュニティは無償）。`CONNPASS_API_KEY` 未設定ならコネクタは `isEnabled()` が false を返してスキップされるので、キー未取得でもアプリは動く。
+
+### 手動登録（マイナビ・X）
+
+マイナビと X は**自動取り込みができない**（X は API 無料枠廃止で全文検索が Enterprise 契約、マイナビは実体ページが robots.txt の `Disallow: /*?` に該当）。調べ直して同じ結論に辿り着く前に、ここを読むこと。
+
+- `/admin/new` — URL を貼る → `POST /api/admin/preview` → `fetchPageMeta` で OGP / JSON-LD を抽出 → フォーム前埋め → 人が確認して `POST /api/admin/events`
+- `/admin/bookmarklet` — 見ているページの DOM から拾って `/admin/new` にクエリで渡す。**サーバーからは取得しない**
+- 認証は `middleware.ts`。`ADMIN_PASSWORD` 未設定時は 404（401 ではない。設定漏れで露出させないため）
+- **概要は 200 文字で保存**（`DESCRIPTION_MAX_LENGTH`）。告知本文の全文複製を避けるための制限なので、緩めないこと
 
 ### スタイリング
 - Tailwind + CSS カスタムプロパティ（`src/app/globals.css`）

@@ -30,6 +30,8 @@ enum EventFormat {
 enum IngestSource {
   CONNPASS
   DOORKEEPER
+  MYNAVI
+  X
   MANUAL
 }
 
