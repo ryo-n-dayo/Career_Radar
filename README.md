@@ -1,287 +1,71 @@
 # Career Radar
 
-> **就活情報を一元管理する Next.js ダッシュボードアプリ**  
-> 企業の採用イベント・説明会・選考情報を集約し、締切管理・AI 要約・X 取り込み・Google 連携を提供する。
+学生の就職活動で散らばりがちな企業情報・メール・締切を、一つの画面で把握するためのダッシュボードです。個人開発として、技育CAMPハッカソンで制作しました。
 
----
+[ポートフォリオ](https://myhomepage-neon.vercel.app) · [技術スタック](#技術スタック) · [セットアップ](#ローカルで起動する)
 
-## なぜ作ったか
+## 受賞
 
-最近の世の中は情報過多で、毎日 X・インスタ・LinkedIn・公式サイトなど大量の情報が流れてくる。いちいち見に行く時間は使いたくないけど、有益な採用情報は見逃したくない——そんな課題を解決するために作った。
+**サポーターズ賞 — 技育CAMPハッカソン 2026年度 Vol.2**
 
----
+Career Radar を個人で開発し、株式会社サポーターズによるサポーターズ賞を受賞しました。
 
+## できること
 
-<img width="2226" height="1342" alt="image" src="https://github.com/user-attachments/assets/4d3af5aa-371f-4035-8749-751f394b889d" />
-<img width="2223" height="1343" alt="image" src="https://github.com/user-attachments/assets/02247e93-52e0-4b3d-81d9-adc5adc6d12b" />
-<img width="2221" height="1391" alt="image" src="https://github.com/user-attachments/assets/efc2ac30-036a-4527-a0b7-9a0d9f77249b" />
-
-## 主要機能
-
-### コア機能
-
-| 機能 | 説明 |
-|------|------|
-| **メインDB** | 企業採用情報（インターン／早期選考／セミナー／本選考／説明会）の集約管理 |
-| **締切カウントダウン** | SVG リングアニメで残日数を可視化（3日以内→赤・それ以上→アクセント） |
-| **フィルタリング** | 期間・カテゴリ・ソース・キーワード検索の複合フィルタ |
-| **企業比較モード** | 複数企業をチェックして横並びで比較できるダイアログ |
-| **お気に入り保存** | ★ ボタンで保存、保存済みのみ表示フィルタ |
-
-### 連携・取り込み機能
-
-| 機能 | 説明 |
-|------|------|
-| **X（Twitter）取り込み** | 投稿本文を AI キーワードマッチング・要約して DB へ登録 |
-| **Gmail 同期** | 採用メールを自動取得・管理 |
-| **Google Calendar 連携** | 右パネルのボタンでワンクリックで締切日を Google Calendar に追加。カレンダービューからも個別追加可能 |
-| **ニュースパネル** | Hatena / Google News / Qiita / Zenn からキャリア関連ニュースを取得 |
-
-### カレンダー機能
-
-| 機能 | 説明 |
-|------|------|
-| **📅 カレンダーに追加ボタン** | 右詳細パネル・カレンダービューどちらからもワンクリックで Google Calendar に終日イベント登録 |
-| **カテゴリ別カラー** | インターン→青・早期選考→オレンジ・セミナー→緑・本選考→赤・説明会→紫 |
-| **統合カレンダービュー** | メインDB 全件の締切日とGoogle Calendar イベントを 1 つのカレンダーに統合表示 |
-| **今日ハイライト** | 当日をオレンジ丸でマーク、日曜→赤・土曜→青 |
-
-### AI 分析機能
-
-| 機能 | 説明 |
-|------|------|
-| **AI 要約** | 投稿・記事の自動要約生成 |
-| **キーワード抽出** | 投稿から採用関連キーワードを自動抽出・タグ表示 |
-
-### 補助機能
-
-- **ES 下書き**：投稿・イベント・Wiki からの引用付きドラフト作成
-- **マイページ認証情報保存**：各社マイページの ID／パスワードを localStorage に保存
-- **テーマ切り替え**：ダーク／ライトモード（localStorage で永続化）
-- **新着バナー**：未読フラグ付き新着投稿の通知
-
----
+- Gmail の企業メールを取り込み、就活タスクとして整理
+- Google Calendar に応募締切をワンクリックで追加
+- 締切までの残り時間をリング型カウントダウンで可視化
+- 企業情報を並べて比較
+- ニュースや企業投稿を集約し、確認漏れを減らす
 
 ## 技術スタック
 
-### フレームワーク・言語
+![Career Radar の技術スタック](public/images/career-radar-tech-stack.png)
 
-| 技術 | バージョン | 用途 |
-|------|-----------|------|
-| Next.js | 14.2.0 | フルスタック Web フレームワーク（App Router） |
-| React | 18.3.0 | UI ライブラリ |
-| TypeScript | 5.0.0 | 型安全な開発 |
+| 区分 | 実際に使用している技術 | 役割 |
+| --- | --- | --- |
+| フロントエンド | Next.js 14 / React / TypeScript / Tailwind CSS | 画面表示・操作・ダッシュボードUI |
+| バックエンド | Next.js Route Handlers / Prisma | API・データ処理 |
+| データベース | SQLite (`prisma/dev.db`) | ローカルでのデータ保存 |
+| 外部連携 | Google OAuth 2.0 / Gmail API / Google Calendar API / GNews API | 認証・メール・予定・ニュースの連携 |
 
-### スタイリング
+### 使っていないもの
 
-| 技術 | バージョン | 用途 |
-|------|-----------|------|
-| Tailwind CSS | 3.0.0 | ユーティリティ CSS |
-| tailwind-merge | 3.5.0 | クラス名の競合解消 |
-| tailwindcss-animate | 1.0.7 | アニメーションユーティリティ |
-| class-variance-authority | 0.7.1 | UI バリアント管理 |
+このリポジトリの現行実装では、外部 PostgreSQL / Supabase、クラウドストレージ、独立したバックエンドサーバーは使用していません。データはローカルの SQLite に保存し、外部サービスとの連携は Google API などに限定しています。
 
-### バックエンド・DB
-
-| 技術 | 用途 |
-|------|------|
-| Prisma | ORM・マイグレーション管理 |
-| SQLite | 開発環境 DB |
-| PostgreSQL (Supabase) | 本番環境 DB |
-
-### 外部連携
-
-| 技術 | 用途 |
-|------|------|
-| googleapis | Gmail / Calendar API |
-| @react-oauth/google | Google OAuth フロー |
-| next-auth | 認証セッション管理 |
-
-### ユーティリティ・テスト
-
-| 技術 | 用途 |
-|------|------|
-| date-fns | 日付計算・フォーマット |
-| Lucide React | SVG アイコン |
-| Vitest | ユニットテスト |
-| ESLint | コード品質チェック |
-
----
-
-## セットアップ
-
-### 1. インストール・起動
-
-Node.js（LTS 推奨）をインストールした上で実行：
+## ローカルで起動する
 
 ```bash
+git clone https://github.com/ryo-n-dayo/Career_Radar.git
+cd Career_Radar
 npm install
+cp .env.example .env
+npx prisma migrate dev
 npm run dev
 ```
 
-ブラウザで `http://localhost:3000` を開く。
+ブラウザで `http://localhost:3000` を開きます。
 
-### 2. 環境変数
+## 環境変数
 
-`.env.example` をコピーして `.env` を作成し、必要な値を設定：
+`.env.example` を `.env` にコピーし、必要な値だけを設定します。
 
-```bash
-cp .env.example .env
-```
+| 変数 | 用途 |
+| --- | --- |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth の認証情報 |
+| `GOOGLE_CALLBACK_URL` | OAuth のリダイレクト先 |
+| `GNEWS_API_KEY` | ニュース取得 |
+| `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` | 任意の AI 要約機能 |
+| `CRON_SECRET` | Vercel Cron の保護 |
+| `NEXT_PUBLIC_DEMO_USER_ID` | 任意のデモ用ユーザー ID |
 
-### 3. DB セットアップ（Prisma）
+実際の API キー、OAuth シークレット、ローカルDB、ビルド生成物は GitHub にコミットしません。
 
-```bash
-npm run prisma:generate
-npm run prisma:migrate -- --name init
-npm run db:seed
-```
+## リンク
 
-確認用 Prisma Studio：
+- [ポートフォリオ](https://myhomepage-neon.vercel.app)
+- [App Store — Gymgrind](https://apps.apple.com/jp/app/gymgrind/id6790394636?l=en-US)
 
-```bash
-npm run prisma:studio
-```
+## License
 
-### トラブルシューティング
-
-**`EMFILE: too many open files` が出る場合：**
-
-```bash
-CHOKIDAR_USEPOLLING=1 npm run dev
-```
-
----
-
-## よく使うコマンド
-
-```bash
-npm run dev              # 開発サーバー起動
-npm run build            # 本番ビルド
-npm run lint             # ESLint
-npm run test             # Vitest（単発）
-npm run test:watch       # Vitest watch
-npm run prisma:generate  # Prisma クライアント生成
-npm run prisma:migrate   # マイグレーション実行
-npm run prisma:studio    # Prisma Studio
-npm run db:seed          # シードデータ投入
-```
-
----
-
-## API エンドポイント
-
-| エンドポイント | メソッド | 機能 |
-|--------------|---------|------|
-| `/api/posts/new` | GET | 新着投稿一覧取得 |
-| `/api/posts/new` | POST | 既読マーク |
-| `/api/posts/x-import` | POST | X 投稿取り込み（AI 要約付き） |
-| `/api/auth/google` | GET | Google OAuth URL 生成 |
-| `/api/auth/google` | POST | OAuth コールバック・トークン保存 |
-| `/api/gmail/sync` | GET | Gmail 未読メール同期 |
-| `/api/calendar/sync` | GET | Google Calendar イベント同期 |
-| `/api/calendar/add-event` | POST | 締切日を Google Calendar に追加 |
-| `/api/news/list` | GET | ニュース一覧・未読カウント |
-| `/api/news/refresh` | GET | 外部ソースから再取得 |
-| `/api/cron/daily-fetch` | GET | 日次定期ジョブ |
-
----
-
-## ディレクトリ構成
-
-```
-src/
-├── app/
-│   ├── page.tsx                # ホーム（ThreePaneDashboard）
-│   ├── layout.tsx              # ルートレイアウト
-│   ├── globals.css             # CSS 変数 + keyframes
-│   └── api/
-│       ├── auth/google/        # Google OAuth
-│       ├── posts/              # 投稿管理・X 取り込み
-│       ├── gmail/sync/         # Gmail 同期
-│       ├── calendar/sync/      # Google Calendar 読み込み
-│       ├── calendar/add-event/ # Google Calendar 書き込み
-│       ├── news/               # ニュース取得
-│       └── cron/daily-fetch/   # 定期ジョブ
-├── components/
-│   ├── ui/                     # shadcn 互換 UI パーツ
-│   └── timeline/               # FilterBar / SourceBadge
-├── features/
-│   ├── dashboard/
-│   │   ├── components/         # ThreePaneDashboard・RadarTable・RightDetailPanel など
-│   │   ├── mock/               # radarItems.ts（30 社分のモックデータ）
-│   │   ├── types/              # RadarItem / CompanyProfile
-│   │   └── hooks/              # useCompanyCredentials
-│   └── news/
-│       └── NewsPanel.tsx
-├── hooks/
-│   └── useFilterState.ts
-└── lib/
-    ├── filters.ts              # フィルタロジック
-    ├── google.ts               # Google OAuth 設定
-    ├── ai/                     # AI 要約・ヒートスコア
-    ├── prisma.ts               # Prisma singleton
-    └── utils.ts                # cn()
-
-prisma/
-├── schema.prisma               # データモデル定義
-├── seed.ts                     # 初期データ
-└── dev.db                      # SQLite（開発用）
-```
-
----
-
-## データモデル
-
-```
-User ─────────┐
-              ├─── FavoriteCompany
-Company ──────┘
-  │
-  ├─── Post ────── AIAnalysis
-  ├─── Event
-  ├─── WikiEntry
-  ├─── ESDraft
-  ├─── Email
-  └─── CalendarEvent
-
-NewsArticle（独立）
-JointEvent（合同説明会）
-```
-
-> 現在 UI は `src/features/dashboard/mock/radarItems.ts` のモックデータを参照。実データ化は `radarItems` を Prisma サーバーコンポーネントに置換するだけで完了する設計。
-
----
-
-## デザインシステム
-
-yui540 さんを参考にさせていただきました。
-
-| CSS 変数 | 値 | 用途 |
-|----------|----|------|
-| `--accent` | `hsl(26 54% 56%)` キャラメル | メインアクセント |
-| `--accent-2` | `hsl(14 70% 58%)` テラコッタ | グラデーション用 |
-| `--background` | `hsl(0 0% 100%)` | 背景 |
-| `--radius` | `14px` | 角丸の基準値 |
-
-**アニメーションクラス：** `yui-fade-rise` / `yui-shine` / `yui-card` / `yui-ring-pulse` / `yui-heading` / `yui-pill`
-
----
-
-## 更新履歴
-
-| 日付 | 内容 |
-|------|------|
-| 2026-04-22 | 初期コミット・骨格構築 |
-| 2026-04-24 | 3ペイングリッド修正・AI分析プロファイルビュー追加 |
-| 2026-04-24 | 比較モード・認証情報保存・30社モックデータ追加 |
-| 2026-04-25 | お気に入り機能・会社情報拡充・yui540風デザイン刷新 |
-| 2026-04-25 | 独立スクロール・カード選択時トップ復帰・不要UI削除 |
-| 2026-04-26 | カレンダー機能：ワンクリック Google Calendar 追加・統合カレンダービュー |
-| 2026-04-27 | カレンダービューからも Google Calendar 追加ボタンを追加 |
-
----
-
-## 関連リンク
-
-- GitHub: [404-Ryo/nextjs-app](https://github.com/404-Ryo/nextjs-app)
+Private / All rights reserved.

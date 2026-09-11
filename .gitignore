@@ -10,6 +10,7 @@ node_modules/
 /.next/
 /out/
 .next/
+*.tsbuildinfo
 
 # Production
 /build
@@ -49,6 +50,7 @@ Thumbs.db
 
 # Prisma
 prisma/.env
+prisma/dev.db
 
 # Optional npm cache directory
 .npm
