@@ -6,6 +6,7 @@ import type { EventFormat, EventItem, EventKind, IngestSource } from "../types/e
 function toEventItem(event: Event): EventItem {
   return {
     id: event.id,
+    companyId: event.companyId ?? undefined,
     url: event.url,
     ingestSource: event.ingestSource as IngestSource,
     title: event.title,

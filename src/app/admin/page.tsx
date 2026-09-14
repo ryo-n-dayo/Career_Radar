@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { EventAdminList } from "@/features/events/components/admin/EventAdminList";
 import { getEvents } from "@/features/events/server/getEvents";
 
@@ -9,7 +11,7 @@ export default async function AdminPage() {
   return (
     <main className="mx-auto max-w-3xl px-5 py-8">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-xl font-semibold tracking-tight">管理</h1>
+        <h1 className="text-xl font-semibold tracking-tight">イベント編集</h1>
         <span className="text-xs text-muted-foreground">{events.length}件</span>
         <div className="ml-auto flex gap-2">
           <a
@@ -28,17 +30,17 @@ export default async function AdminPage() {
       </div>
 
       <p className="mt-2 text-sm text-muted-foreground">
-        マイナビや X で見つけたイベントは、URL を貼るか ブックマークレット から登録します。
+        企業サイトや X で見つけたイベントを登録し、日時や企業との紐付けを修正します。
       </p>
 
       <EventAdminList events={events} />
 
-      <a
-        href="/"
+      <Link
+        href="/events"
         className="mt-8 inline-block text-xs text-muted-foreground transition-colors hover:text-foreground"
       >
-        ← サイトを見る
-      </a>
+        ← 予定・カレンダーを見る
+      </Link>
     </main>
   );
 }

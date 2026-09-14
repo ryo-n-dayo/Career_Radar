@@ -1,0 +1,39 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dailynews",
+  // .open-next/worker.js を再利用しつつ scheduled ハンドラを足した自作エントリ
+  "main": "./worker.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": [
+    "nodejs_compat",
+    // Worker からの fetch を必ず公開インターネット経由にする（SSRF 対策の一枚目）
+    "global_fetch_strictly_public"
+  ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "dailynews",
+      "database_id": "c9a5d92f-9fcd-494b-828d-9bd60a9c0b1d",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // JST 6:00 = UTC 21:00。1日1回スキャンする
+  "triggers": {
+    "crons": ["0 21 * * *"]
+  },
+  "vars": {
+    // 一時停止中。Workers Paid に切り替えて運用を再開するときに "true" へ戻す
+    "X_API_ENABLED": "false",
+    "X_API_DAILY_POST_LIMIT": "20",
+    "X_API_MONTHLY_BUDGET_USD": "5",
+    "X_API_KEYWORDS": "インターン,採用,募集,説明会,イベント,エントリー",
+    "GOOGLE_OAUTH_REDIRECT_URI": "https://dailynews.ppajt5zzcf.workers.dev/api/google/callback"
+  }
+}

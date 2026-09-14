@@ -111,6 +111,7 @@ export function parseEventInput(body: unknown): ParseResult {
     ok: true,
     value: {
       url,
+      companyId: asString(input.companyId),
       externalId: asString(input.externalId),
       ingestSource,
       title,

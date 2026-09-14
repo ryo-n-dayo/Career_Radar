@@ -9,7 +9,7 @@ export const maxDuration = 20;
 
 /**
  * URL を1回だけ取得して、登録フォームの前埋め用の推定結果を返す。
- * 認証は middleware.ts の /api/admin ガードに任せている。
+ * 認証は Cloudflare Access（Worker 単位のポリシー）に任せている。アプリ内には認証を持たない。
  */
 export async function POST(request: NextRequest) {
   const body = (await request.json().catch(() => null)) as { url?: string } | null;

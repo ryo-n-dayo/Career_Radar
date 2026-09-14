@@ -1,10 +1,12 @@
 import { Suspense } from "react";
 
 import { EventForm } from "@/features/events/components/admin/EventForm";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export default function NewEventPage() {
+export default async function NewEventPage() {
+  const companies = await prisma.company.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } });
   return (
     <main className="mx-auto max-w-3xl px-5 py-8">
       <a href="/admin" className="text-xs text-muted-foreground transition-colors hover:text-foreground">
@@ -16,7 +18,7 @@ export default function NewEventPage() {
       </p>
 
       <Suspense fallback={<div className="mt-6 text-sm text-muted-foreground">読み込み中...</div>}>
-        <EventForm />
+        <EventForm companies={companies} />
       </Suspense>
     </main>
   );

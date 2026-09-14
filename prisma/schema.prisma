@@ -1,78 +1,220 @@
-// イベント集約サイト - Prisma schema (PostgreSQL / Neon)
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
-/// イベントの種別。取り込み時に classify.ts がタイトル・タグから推定する。
-enum EventKind {
-  HACKATHON
-  CONTEST
-  INTERNSHIP
-  MEETUP
-  SEMINAR
-  OTHER
+model Candidate {
+  id             String      @id @default(cuid())
+  sourceId       String
+  url            String
+  title          String
+  summary        String?
+  content        String?
+  kind           String      @default("UPDATE")
+  score          Int         @default(0)
+  reasons        Json        @default("[]")
+  publishedAt    DateTime?
+  deadline       DateTime?
+  detectedAt     DateTime    @default(now())
+  status         String      @default("NEW")
+  contentHash    String
+  feedbackValue  Int?
+  feedbackReason String?
+  isActive       Boolean     @default(true)
+  lastSeenAt     DateTime?
+  source         WatchSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceId, url, contentHash])
+  @@index([isActive, kind, lastSeenAt])
+  @@index([feedbackValue, detectedAt])
+  @@index([sourceId])
+  @@index([status, score, detectedAt])
 }
 
-enum EventFormat {
-  ONLINE
-  OFFLINE
-  HYBRID
-}
-
-/// どこから取り込んだか。MANUAL は seed / 手動登録。
-enum IngestSource {
-  CONNPASS
-  DOORKEEPER
-  MYNAVI
-  X
-  MANUAL
+model Company {
+  id         String        @id @default(cuid())
+  name       String        @unique
+  website    String?
+  industry   String?
+  summary    String?
+  memo       String?
+  tags       Json          @default("[]")
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  careersUrl String?
+  xHandle    String?
+  events     Event[]
+  posts      SavedPost[]
+  sources    WatchSource[]
 }
 
 model Event {
-  id           String       @id @default(cuid())
-  /// 冪等 upsert のキー。イベント告知ページの URL。
-  url          String       @unique
-  externalId   String?
-  ingestSource IngestSource @default(MANUAL)
-
-  title       String
-  description String?
-  imageUrl    String?
-
-  kind   EventKind
-  format EventFormat
-  /// オンライン開催では null
-  prefecture String?
-  venue      String?
-
-  startsAt DateTime
-  endsAt   DateTime?
-  /// 応募・参加登録の締切。無い場合は startsAt をカウントダウンに使う。
+  id            String    @id @default(cuid())
+  url           String    @unique
+  externalId    String?
+  ingestSource  String    @default("MANUAL")
+  title         String
+  description   String?
+  imageUrl      String?
+  kind          String
+  format        String
+  prefecture    String?
+  venue         String?
+  startsAt      DateTime
+  endsAt        DateTime?
   applyDeadline DateTime?
+  organizer     String?
+  organizerUrl  String?
+  prize         String?
+  tags          Json      @default("[]")
+  capacity      Int?
+  accepted      Int?
+  companyId     String?
+  fetchedAt     DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  company       Company?  @relation(fields: [companyId], references: [id])
 
-  /// 主催者名は文字列で保持する（企業テーブルは持たない）
-  organizer    String?
-  organizerUrl String?
-  /// 賞金・賞品。ハッカソン / ビジコンでの主要な判断材料。
-  prize String?
-  /// string[]
-  tags Json @default("[]")
-
-  capacity Int?
-  accepted Int?
-
-  fetchedAt DateTime @default(now())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([startsAt])
-  @@index([applyDeadline])
+  @@index([companyId])
   @@index([kind, startsAt])
+  @@index([applyDeadline])
+  @@index([startsAt])
+}
+
+model GoogleCalendarEvent {
+  id               String           @id @default(cuid())
+  connectionId     String
+  externalId       String
+  calendarId       String
+  calendarName     String?
+  summary          String
+  startsAt         DateTime
+  endsAt           DateTime?
+  isAllDay         Boolean          @default(false)
+  location         String?
+  htmlLink         String?
+  googleUpdatedAt  DateTime?
+  status           String?
+  syncedAt         DateTime         @default(now())
+  GoogleConnection GoogleConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@unique([connectionId, externalId])
+  @@index([connectionId, startsAt])
+}
+
+model GoogleConnection {
+  id                     String                @id @default("google")
+  email                  String?
+  accessTokenCiphertext  String
+  refreshTokenCiphertext String?
+  tokenExpiresAt         DateTime?
+  scopes                 Json                  @default("[]")
+  gmailLastSyncedAt      DateTime?
+  calendarLastSyncedAt   DateTime?
+  lastError              String?
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+  GoogleCalendarEvent    GoogleCalendarEvent[]
+  GoogleGmailMessage     GoogleGmailMessage[]
+}
+
+model GoogleGmailMessage {
+  id               String           @id @default(cuid())
+  connectionId     String
+  externalId       String
+  threadId         String?
+  fromAddress      String?
+  subject          String
+  snippet          String?
+  receivedAt       DateTime?
+  labels           Json             @default("[]")
+  gmailUrl         String?
+  isRelevant       Boolean          @default(true)
+  syncedAt         DateTime         @default(now())
+  GoogleConnection GoogleConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@unique([connectionId, externalId])
+  @@index([connectionId, isRelevant, receivedAt])
+}
+
+model InterestProfile {
+  id              String   @id @default(cuid())
+  includeKeywords Json     @default("[]")
+  excludeKeywords Json     @default("[]")
+  updatedAt       DateTime @updatedAt
+  selectedTopics  Json     @default("[]")
+  topicHistory    Json     @default("[]")
+  eventTopics     Json     @default("[]")
+  eventPeople     Json     @default("[]")
+  eventTalks      Json     @default("[]")
+}
+
+model MeetupPlan {
+  url       String   @id
+  saved     Boolean  @default(false)
+  people    String   @default("")
+  talks     String   @default("")
+  updatedAt DateTime @updatedAt
+}
+
+model SavedPost {
+  id        String    @id @default(cuid())
+  url       String    @unique
+  author    String?
+  account   String?
+  content   String
+  summary   String?
+  memo      String?
+  tags      Json      @default("[]")
+  postedAt  DateTime?
+  savedAt   DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  companyId String?
+  company   Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@index([savedAt])
+}
+
+model WatchSource {
+  id             String      @id @default(cuid())
+  name           String
+  url            String      @unique
+  kind           String      @default("PAGE")
+  enabled        Boolean     @default(true)
+  confirmedAt    DateTime?
+  termsUrl       String?
+  notes          String?
+  companyId      String?
+  etag           String?
+  lastModified   String?
+  contentHash    String?
+  lastCheckedAt  DateTime?
+  lastSuccessAt  DateTime?
+  lastChangedAt  DateTime?
+  lastStatus     String      @default("PENDING")
+  lastError      String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  lastExternalId String?
+  candidates     Candidate[]
+  company        Company?    @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@index([enabled, lastCheckedAt])
+}
+
+model XUsageDaily {
+  id               String   @id @default(cuid())
+  dateKey          String   @unique
+  postsRead        Int      @default(0)
+  requestCount     Int      @default(0)
+  estimatedCostUsd Float    @default(0)
+  updatedAt        DateTime @updatedAt
+
+  @@index([dateKey])
 }

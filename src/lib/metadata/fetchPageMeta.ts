@@ -1,14 +1,13 @@
-import { lookup } from "node:dns/promises";
-import { isIP } from "node:net";
+import { resolve4, resolve6 } from "node:dns/promises";
 
 import { parsePageMeta, type PageMeta } from "./parsePageMeta";
 
 const TIMEOUT_MS = 10_000;
-const MAX_BYTES = 1_000_000;
+export const MAX_FETCH_BYTES = 1_000_000;
 const MAX_REDIRECTS = 5;
 
-const USER_AGENT =
-  "EventRadarBot/0.1 (+manual single-page fetch; triggered by a site administrator)";
+export const EVENT_GATHERING_USER_AGENT =
+  "DailyNewsBot/0.1 (+local personal research; http://localhost:3000/sources)";
 
 export class FetchPageMetaError extends Error {
   constructor(
@@ -21,11 +20,24 @@ export class FetchPageMetaError extends Error {
 }
 
 /**
+ * ホスト名が IP リテラルなら 4 / 6 を、そうでなければ 0 を返す。
+ * Cloudflare Workers では node:net の isIP が使えないので自前で判定する。
+ */
+function ipVersion(host: string): 0 | 4 | 6 {
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) {
+    return host.split(".").every((part) => Number(part) <= 255) ? 4 : 0;
+  }
+  // ざっくりで良い。厳密な IPv6 判定は isPrivateAddress 側の正規表現に委ねる。
+  if (host.includes(":") && /^[0-9a-f:.]+$/i.test(host)) return 6;
+  return 0;
+}
+
+/**
  * SSRF 対策。内部ネットワークへの到達を防ぐ。
  * 管理者しか叩けないエンドポイントだが、任意 URL を取得する以上は必須。
  */
-function isPrivateAddress(address: string): boolean {
-  if (isIP(address) === 6) {
+export function isPrivateAddress(address: string): boolean {
+  if (ipVersion(address) === 6) {
     const normalized = address.toLowerCase();
     if (normalized === "::1" || normalized === "::") return true;
     // fc00::/7 (ユニークローカル) と fe80::/10 (リンクローカル)
@@ -52,33 +64,36 @@ function isPrivateAddress(address: string): boolean {
   return false;
 }
 
-async function assertPublicUrl(url: URL): Promise<void> {
+export async function assertPublicUrl(url: URL): Promise<void> {
   if (url.protocol !== "http:" && url.protocol !== "https:") {
     throw new FetchPageMetaError("http/https 以外の URL は取得できません", 400);
   }
 
-  const host = url.hostname;
-  if (isIP(host)) {
+  // URL の [::1] のような角括弧は取り除いてから判定する
+  const host = url.hostname.replace(/^\[|\]$/g, "");
+  if (ipVersion(host)) {
     if (isPrivateAddress(host)) {
       throw new FetchPageMetaError("内部ネットワークの URL は取得できません", 400);
     }
     return;
   }
 
-  let addresses: Array<{ address: string }>;
-  try {
-    addresses = await lookup(host, { all: true });
-  } catch {
+  // Workers の node:dns は lookup を実装していない（Not implemented）ため resolve4 / resolve6 を使う。
+  // どちらも DNS over HTTPS 経由になり、1 回につきサブリクエストを 1 つ消費する。
+  const resolved = await Promise.allSettled([resolve4(host), resolve6(host)]);
+  const addresses = resolved.flatMap((entry) => (entry.status === "fulfilled" ? entry.value : []));
+
+  if (addresses.length === 0) {
     throw new FetchPageMetaError(`ホスト名を解決できません: ${host}`, 400);
   }
 
-  if (addresses.length === 0 || addresses.some((entry) => isPrivateAddress(entry.address))) {
+  if (addresses.some((address) => isPrivateAddress(address))) {
     throw new FetchPageMetaError("内部ネットワークの URL は取得できません", 400);
   }
 }
 
 /** 1MB を超えたら読むのをやめる。HTML の <head> は先頭にあるので途中で切っても困らない。 */
-async function readCapped(response: Response): Promise<string> {
+export async function readCapped(response: Response): Promise<string> {
   const body = response.body;
   if (!body) return "";
 
@@ -93,7 +108,7 @@ async function readCapped(response: Response): Promise<string> {
       if (done) break;
       received += value.byteLength;
       text += decoder.decode(value, { stream: true });
-      if (received >= MAX_BYTES) break;
+      if (received >= MAX_FETCH_BYTES) break;
     }
   } finally {
     await reader.cancel().catch(() => {});
@@ -127,7 +142,7 @@ export async function fetchPageMeta(rawUrl: string): Promise<PageMeta> {
           redirect: "manual",
           signal: controller.signal,
           headers: {
-            "User-Agent": USER_AGENT,
+            "User-Agent": EVENT_GATHERING_USER_AGENT,
             Accept: "text/html,application/xhtml+xml"
           }
         });

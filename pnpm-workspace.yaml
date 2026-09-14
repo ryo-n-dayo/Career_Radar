@@ -1,0 +1,19 @@
+# Windows で Developer Mode を有効にしていないと fs.symlink が EPERM で落ちる。
+# Next.js の standalone 出力（OpenNext のビルドに必須）が node_modules の symlink 構造を
+# そのまま再現しようとするため、実体配置（hoisted）にして symlink をなくしている。
+nodeLinker: hoisted
+
+allowBuilds:
+  '@prisma/client': true
+  '@prisma/engines': true
+  esbuild: true
+  prisma: true
+  unrs-resolver: true
+  workerd: true
+onlyBuiltDependencies:
+  - '@prisma/client'
+  - '@prisma/engines'
+  - esbuild
+  - prisma
+  - unrs-resolver
+  - workerd

@@ -87,6 +87,12 @@ export function EventAdminList({ events }: { events: EventItem[] }) {
 
             <div className="flex shrink-0 gap-1.5">
               <a
+                href={`/admin/edit/${event.id}`}
+                className="inline-flex h-9 items-center rounded-md border border-border bg-background px-3 text-sm transition-colors hover:bg-muted"
+              >
+                編集
+              </a>
+              <a
                 href={`/events/${event.id}`}
                 target="_blank"
                 rel="noopener noreferrer"

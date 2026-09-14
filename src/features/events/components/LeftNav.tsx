@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { APP_NAME } from "@/lib/appConfig";
 import { countdownTarget, type EventItem } from "../types/eventItem";
 
 export type ViewMode = "list" | "calendar" | "saved";
@@ -72,11 +74,11 @@ export function LeftNav({ viewMode, onChangeView, events, savedCount }: Props) {
           <span className="text-sm">◎</span>
         </div>
         <div className="min-w-0">
-          <div className="text-sm font-semibold tracking-tight">Event Radar</div>
+          <div className="text-sm font-semibold tracking-tight">{APP_NAME}</div>
           <div className="truncate text-[10px] leading-tight text-muted-foreground">
-            ハッカソン・ビジコン・
+            X・企業・イベントを
             <br />
-            企業イベントを一箇所で。
+            一箇所で整理。
           </div>
         </div>
       </div>
@@ -112,6 +114,9 @@ export function LeftNav({ viewMode, onChangeView, events, savedCount }: Props) {
           ナビ
         </div>
         <div className="flex flex-col gap-1.5">
+          <Link href="/" className="rounded-xl border border-border bg-background px-3 py-2 text-sm font-medium transition hover:border-[hsl(var(--accent))]/40">⌂ ホーム</Link>
+          <Link href="/posts" className="rounded-xl border border-border bg-background px-3 py-2 text-sm font-medium transition hover:border-[hsl(var(--accent))]/40">𝕏 投稿</Link>
+          <Link href="/companies" className="rounded-xl border border-border bg-background px-3 py-2 text-sm font-medium transition hover:border-[hsl(var(--accent))]/40">▦ 企業</Link>
           {navItems.map(({ key, label, badge }) => (
             <button
               key={key}
@@ -137,6 +142,7 @@ export function LeftNav({ viewMode, onChangeView, events, savedCount }: Props) {
               )}
             </button>
           ))}
+          <Link href="/admin" className="rounded-xl border border-border bg-background px-3 py-2 text-sm font-medium transition hover:border-[hsl(var(--accent))]/40">✎ イベント編集</Link>
         </div>
       </div>
 

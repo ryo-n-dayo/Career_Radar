@@ -6,26 +6,29 @@
 
 ## プロジェクト概要
 
-**Event Radar** — ハッカソン・ビジネスコンテスト・企業主催イベントの募集情報を集約する Next.js アプリ。方々に散らばっている告知を一箇所に集め、締切カウントダウン・フィルタ・カレンダー連携を提供する。
+**DailyNews** — localhostで使う個人用の情報収集・整理アプリ。公開企業サイトの更新候補、X投稿、企業、イベントをSQLiteへ保存し、締切管理・カレンダー連携を提供する。
 
 - **ログイン不要の公開サイト**。保存（★）は localStorage のみで、ユーザーテーブルを持たない
 - 3ペイン構成（左：ナビ / 中央：一覧 / 右：詳細）
 - オレンジアクセント（caramel）× クリーム背景の yui540 風デザイン
-- Vercel + Neon (PostgreSQL) を前提
+- **Cloudflare Workers（@opennextjs/cloudflare）+ D1** で動かす。アクセス制御は Cloudflare Access（アプリ側に認証コードを持たない）
+- パッケージマネージャは pnpm。`pnpm-workspace.yaml` の `nodeLinker: hoisted` は Windows の symlink 制限を回避するための設定なので外さない
 
 ## よく使うコマンド
 
 ```bash
-npm run dev            # 開発サーバー起動
-npm run build          # 本番ビルド（DATABASE_URL が必要）
-npm run lint           # ESLint（flat config なので next lint ではなく eslint を直接叩く）
-npm run test           # Vitest 実行（単発）
-npm run test:watch     # Vitest watch
-npm run prisma:generate
-npm run prisma:migrate # 開発用マイグレーション
-npm run prisma:deploy  # 本番マイグレーション適用
-npm run prisma:studio  # Prisma Studio
-npm run db:seed        # prisma/seed.ts を実行
+pnpm dev                # 開発サーバー（ローカル D1 バインディング付き）
+pnpm build              # next build のみ
+pnpm cf:build           # next build + OpenNext バンドル
+pnpm cf:preview         # workerd 上で確認（本番と同じランタイム）
+pnpm cf:deploy          # Cloudflare へデプロイ
+pnpm lint               # ESLint（flat config なので next lint ではなく eslint を直接叩く）
+pnpm test               # Vitest 実行（単発）
+pnpm test:watch         # Vitest watch
+pnpm prisma:generate
+pnpm d1:migrate:local   # migrations/*.sql をローカル D1 に適用
+pnpm d1:migrate:remote  # 本番 D1 に適用
+pnpm d1:export          # prisma/dev.db → D1 投入用 INSERT 文（scripts/d1-seed/）
 ```
 
 ## アーキテクチャ
@@ -34,9 +37,9 @@ npm run db:seed        # prisma/seed.ts を実行
 ```
 src/
   app/
-    page.tsx              # トップ。getEvents() → EventBrowser（ISR revalidate 600）
+    page.tsx              # トップ。全ページ force-dynamic（ISR キャッシュは持たない）
     events/[id]/page.tsx  # 個別イベントページ（generateMetadata で OGP）
-    api/cron/ingest/      # Vercel Cron 用の取り込みエンドポイント
+    api/                  # 収集・管理用のルートハンドラ（定期実行は worker.ts の scheduled 側）
     admin/                # 管理画面（手動登録・ブックマークレット）
     api/admin/            # preview（URLからメタ取得）/ events（登録・削除）
   components/
@@ -97,7 +100,7 @@ prisma/
 
 - `/admin/new` — URL を貼る → `POST /api/admin/preview` → `fetchPageMeta` で OGP / JSON-LD を抽出 → フォーム前埋め → 人が確認して `POST /api/admin/events`
 - `/admin/bookmarklet` — 見ているページの DOM から拾って `/admin/new` にクエリで渡す。**サーバーからは取得しない**
-- 認証は `middleware.ts`。`ADMIN_PASSWORD` 未設定時は 404（401 ではない。設定漏れで露出させないため）
+- **アプリ内に認証はない**。`/admin` も `/api/admin/*` も素通りなので、公開時は必ず Cloudflare Access を Worker に付ける
 - **概要は 200 文字で保存**（`DESCRIPTION_MAX_LENGTH`）。告知本文の全文複製を避けるための制限なので、緩めないこと
 
 ### スタイリング
@@ -115,7 +118,11 @@ prisma/
 - Google カレンダー連携は **OAuth を使わない**。`src/lib/calendarLink.ts` の `googleCalendarUrl()` / `buildIcs()` でリンクを生成するだけ。
 - テーマは `document.documentElement` の `.dark` クラス + `localStorage.theme`。`LeftNav` が制御。
 - 色の追加は必ず `globals.css` の CSS 変数 or Tailwind のパレット（`orange-*` など）経由で。ハードコード値は避ける。
-- `npm run lint` は `eslint` を直接叩く。`next lint` は flat config（`eslint.config.mjs`）と噛み合わず対話プロンプトで止まる。
+- `pnpm lint` は `eslint` を直接叩く。`next lint` は flat config（`eslint.config.mjs`）と噛み合わず対話プロンプトで止まる。
+- **Prisma は `@prisma/client/wasm.js` から import する**（`src/lib/prisma.ts`）。素の `@prisma/client` だと node 条件が先に解決されて Rust の query engine を読みに行き、workerd で落ちる。拡張子を外すと `exports` が実在しない `wasm.mjs` を指すのでこれも落ちる。
+- `src/lib/prisma.ts` の `prisma` は Proxy で、アクセス時に D1 バインディングからクライアントを作る。cron（scheduled）からは `getCloudflareContext()` が使えないので `setWorkerEnv(env)` を先に呼ぶ。
+- **Workers では `node:dns` の `lookup` と `node:net` が使えない**。`node:crypto`（`createHash` / `createCipheriv` / `timingSafeEqual`）は使える。
+- `next.config.mjs` の `serverExternalPackages: ["@prisma/client", ".prisma/client"]` は OpenNext が Prisma を workerd 用に扱うために必要。外さない。
 
 ## 型規約
 

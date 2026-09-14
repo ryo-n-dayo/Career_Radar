@@ -64,3 +64,19 @@ tsconfig.tsbuildinfo
 .server.log
 prisma/*.db
 prisma/*.db-journal
+logs/
+
+# D1 へ流し込む個人データのダンプ（Gitには入れない）
+scripts/d1-seed/
+.dev.vars
+.open-next/
+.wrangler/
+
+# 旧設定のバックアップ（シークレットを含むことがある）
+*.bak
+
+# ローカル起動スクリプトのログ
+.dailynews-server*.log
+
+# npm から pnpm へ移行したときの残骸
+package-lock.json.unused

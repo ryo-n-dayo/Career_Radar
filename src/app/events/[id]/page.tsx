@@ -10,9 +10,9 @@ import {
 } from "@/features/events/types/eventItem";
 import { googleCalendarUrl } from "@/lib/calendarLink";
 
-export const revalidate = 600;
+export const dynamic = "force-dynamic";
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString("ja-JP", {
@@ -26,7 +26,8 @@ function formatDateTime(iso: string): string {
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
-  const event = await getEventById(params.id);
+  const { id } = await params;
+  const event = await getEventById(id);
   if (!event) return { title: "イベントが見つかりません" };
 
   const description =
@@ -61,12 +62,13 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 export default async function EventPage({ params }: Params) {
-  const event = await getEventById(params.id);
+  const { id } = await params;
+  const event = await getEventById(id);
   if (!event) notFound();
 
   return (
     <main className="mx-auto max-w-2xl px-5 py-10">
-      <Link href="/" className="text-xs text-muted-foreground transition-colors hover:text-foreground">
+      <Link href="/events" className="text-xs text-muted-foreground transition-colors hover:text-foreground">
         ← イベント一覧に戻る
       </Link>
 

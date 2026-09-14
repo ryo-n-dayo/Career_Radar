@@ -12,10 +12,13 @@ import {
   EVENT_KIND_LABEL,
   ingestSourceFromUrl,
   type EventFormat,
+  type EventItem,
   type EventKind
 } from "@/features/events/types/eventItem";
+import type { CompanyOption } from "@/features/posts/types";
 
 type FormState = {
+  companyId: string;
   url: string;
   title: string;
   kind: EventKind;
@@ -35,6 +38,7 @@ type FormState = {
 };
 
 const EMPTY: FormState = {
+  companyId: "",
   url: "",
   title: "",
   kind: "OTHER",
@@ -83,7 +87,7 @@ function Field({
 const SELECT_CLASS =
   "flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
 
-export function EventForm() {
+export function EventForm({ initialEvent, companies = [] }: { initialEvent?: EventItem; companies?: CompanyOption[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -97,6 +101,29 @@ export function EventForm() {
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
+
+  useEffect(() => {
+    if (!initialEvent) return;
+    setForm({
+      companyId: initialEvent.companyId ?? "",
+      url: initialEvent.url,
+      title: initialEvent.title,
+      kind: initialEvent.kind,
+      format: initialEvent.format,
+      prefecture: initialEvent.prefecture ?? "",
+      venue: initialEvent.venue ?? "",
+      startsAt: toLocalInput(initialEvent.startsAt),
+      endsAt: toLocalInput(initialEvent.endsAt),
+      applyDeadline: toLocalInput(initialEvent.applyDeadline),
+      organizer: initialEvent.organizer ?? "",
+      organizerUrl: initialEvent.organizerUrl ?? "",
+      prize: initialEvent.prize ?? "",
+      tags: initialEvent.tags.join(", "),
+      description: initialEvent.description ?? "",
+      imageUrl: initialEvent.imageUrl ?? "",
+      capacity: initialEvent.capacity?.toString() ?? ""
+    });
+  }, [initialEvent]);
 
   // ブックマークレットから飛んできた場合はクエリで前埋めする
   useEffect(() => {
@@ -180,6 +207,7 @@ export function EventForm() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           ...form,
+          id: initialEvent?.id,
           startsAt: form.startsAt ? new Date(form.startsAt).toISOString() : "",
           endsAt: form.endsAt ? new Date(form.endsAt).toISOString() : "",
           applyDeadline: form.applyDeadline ? new Date(form.applyDeadline).toISOString() : "",
@@ -248,6 +276,13 @@ export function EventForm() {
 
       <Field label="イベント名（必須）">
         <Input required value={form.title} onChange={(e) => set("title", e.target.value)} />
+      </Field>
+
+      <Field label="企業との紐付け" hint="企業台帳の投稿・イベント件数に反映されます">
+        <select className={SELECT_CLASS} value={form.companyId} onChange={(e) => set("companyId", e.target.value)}>
+          <option value="">企業に紐付けない</option>
+          {companies.map((company) => <option key={company.id} value={company.id}>{company.name}</option>)}
+        </select>
       </Field>
 
       <div className="grid grid-cols-2 gap-4">
@@ -357,7 +392,7 @@ export function EventForm() {
 
       <div className="flex gap-2 pt-2">
         <Button type="submit" disabled={submitting}>
-          {submitting ? "登録中..." : "登録する"}
+          {submitting ? "保存中..." : initialEvent ? "更新する" : "登録する"}
         </Button>
         <Button type="button" variant="ghost" onClick={() => router.push("/admin")}>
           キャンセル

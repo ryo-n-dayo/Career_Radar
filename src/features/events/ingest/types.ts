@@ -6,6 +6,7 @@ import type { EventFormat, EventKind, IngestSource } from "../types/eventItem";
  */
 export type NormalizedEvent = {
   url: string;
+  companyId?: string;
   externalId?: string;
   ingestSource: IngestSource;
 

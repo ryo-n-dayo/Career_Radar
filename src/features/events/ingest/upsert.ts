@@ -6,7 +6,21 @@ import type { NormalizedEvent } from "./types";
  * 取り込みコネクタ（run.ts）と管理画面の手動登録（/api/admin/events）の両方から使う。
  */
 export async function upsertEvent(event: NormalizedEvent): Promise<"created" | "updated"> {
-  const data = {
+  const data = toData(event);
+
+  const existing = await prisma.event.findUnique({ where: { url: event.url }, select: { id: true } });
+  await prisma.event.upsert({
+    where: { url: event.url },
+    create: { url: event.url, ...data },
+    update: data
+  });
+
+  return existing ? "updated" : "created";
+}
+
+function toData(event: NormalizedEvent) {
+  return {
+    companyId: event.companyId ?? null,
     externalId: event.externalId ?? null,
     ingestSource: event.ingestSource,
     title: event.title,
@@ -27,13 +41,8 @@ export async function upsertEvent(event: NormalizedEvent): Promise<"created" | "
     accepted: event.accepted ?? null,
     fetchedAt: new Date()
   };
+}
 
-  const existing = await prisma.event.findUnique({ where: { url: event.url }, select: { id: true } });
-  await prisma.event.upsert({
-    where: { url: event.url },
-    create: { url: event.url, ...data },
-    update: data
-  });
-
-  return existing ? "updated" : "created";
+export async function updateEvent(id: string, event: NormalizedEvent): Promise<void> {
+  await prisma.event.update({ where: { id }, data: { url: event.url, ...toData(event) } });
 }

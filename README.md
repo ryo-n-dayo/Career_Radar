@@ -1,166 +1,143 @@
-# Event Radar
+# DailyNews
 
-> **ハッカソン・ビジコン・企業主催イベントを一箇所にまとめる Next.js アプリ**
-> 方々に散らばっているイベント募集情報を集約し、締切から逆算して探せるようにする。
+企業公式サイトの更新候補、Xの投稿、企業情報、イベントを一箇所に集め、朝の確認と予定管理につなげる個人用アプリです。Cloudflare Workers + D1 で動かし、Cloudflare Access で本人だけがアクセスできるようにしています。
 
----
+## できること
 
-## なぜ作ったか
+- X投稿のURL・本文・要約・メモ・タグをSQLiteへ保存
+- X投稿ページからブックマークレットでURLと本文を取り込み
+- `OPENAI_API_KEY` 設定時、投稿本文をAIで要約
+- 企業情報を台帳化し、X投稿やイベントと紐付け
+- 公開された企業公式ページ・RSS・サイトマップをrobots.txtに従って低頻度で確認
+- インターン・採用・イベント候補を関連度と締切で優先表示
+- イベントの登録・修正・削除
+- 締切カウントダウン、一覧フィルタ、月間カレンダー
+- GoogleカレンダーリンクとICS出力
 
-ハッカソンやビジネスコンテスト、企業主催の勉強会・インターンの案内は、connpass・企業サイト・SNS などバラバラの場所に転がっている。探しに行くのは面倒だが、締切を過ぎてから知るのはもっと惜しい。だから「一覧で眺めて、締切が近い順に並べて、気になったらカレンダーに入れる」だけができるサイトを作った。
+データは Cloudflare D1（SQLite）に保存されます。アプリ自体はログイン機構を持たず、アクセス制御は Cloudflare Access に任せています。
 
-ログイン不要。保存はブラウザの localStorage に閉じている。
+## セットアップ（ローカル）
 
----
-
-## 主要機能
-
-| 機能 | 説明 |
-|------|------|
-| **イベント一覧** | ハッカソン / コンテスト / インターン / 勉強会 / セミナーを1つのリストに集約 |
-| **締切カウントダウン** | SVG リングで残日数を可視化（3日以内→赤・7日以内→アクセント色） |
-| **フィルタ** | 種別・開催形式（オンライン/オフライン/ハイブリッド）・地域・期間・キーワード。URL クエリに同期するので絞り込んだ状態を共有できる |
-| **カレンダービュー** | 月次カレンダー上に開催日を種別ごとの色で表示 |
-| **保存** | ★ で保存、「保存済み」ビューで一覧。localStorage のみ |
-| **カレンダー連携** | Googleカレンダー追加リンク / `.ics` ダウンロード。OAuth 不要 |
-| **個別ページ** | `/events/[id]` に OGP 付きの共有用ページ |
-| **手動登録（管理者）** | `/admin` から URL を貼るだけで登録。ブックマークレットで X・マイナビのページから1クリック |
-
----
-
-## セットアップ
-
-```bash
-npm install
-cp .env.example .env
-# .env の DATABASE_URL / DIRECT_URL に Neon の接続文字列を設定する
-npm run prisma:migrate
-npm run db:seed
-npm run dev
+```powershell
+pnpm install
+Copy-Item .env.example .dev.vars
+pnpm d1:migrate:local
+pnpm dev
 ```
 
-`prisma/seed.ts` は **デモ用のサンプルイベント**（架空の主催者・`example.com` の URL）を投入する。UI の確認用であり、実データは取り込みコネクタ経由で入る。
+ブラウザで <http://localhost:3000> を開きます。ローカルでも D1（miniflare のローカル DB）を使います。
+`next.config.mjs` の `initOpenNextCloudflareForDev()` が `wrangler.jsonc` のバインディングを `next dev` に橋渡しします。
 
-### よく使うコマンド
+手元の SQLite（`prisma/dev.db`）から D1 へデータを移すには:
 
-```bash
-npm run dev            # 開発サーバー
-npm run build          # 本番ビルド（DATABASE_URL が必要）
-npm run lint           # ESLint
-npm run test           # Vitest
-npm run prisma:generate
-npm run prisma:migrate # 開発用マイグレーション
-npm run prisma:deploy  # 本番マイグレーション適用
-npm run prisma:studio
-npm run db:seed
+```powershell
+pnpm d1:export
+Get-ChildItem scripts/d1-seed/*.sql | ForEach-Object { npx wrangler d1 execute dailynews --local --file=$_.FullName }
 ```
 
----
+AI要約を使う場合は `.dev.vars` の `OPENAI_API_KEY` を設定してください。未設定でも、手動要約を含むその他の機能は利用できます。
 
-## アーキテクチャ
+> **Windows での注意**: Developer Mode が無効だと `fs.symlink` が EPERM で失敗し、Next.js の standalone 出力（OpenNext のビルドに必須）が落ちます。
+> そのため `pnpm-workspace.yaml` で `nodeLinker: hoisted` を指定し、node_modules に symlink を作らないようにしています。
 
-```
-src/
-  app/
-    page.tsx              # トップ。getEvents() → EventBrowser（ISR 10分）
-    events/[id]/page.tsx  # 個別イベントページ（OGP 付き）
-    api/cron/ingest/      # Vercel Cron から叩く取り込みエンドポイント
-    admin/                # 管理画面（手動登録 / ブックマークレット）
-    api/admin/            # preview（URL からメタ取得）/ events（登録・削除）
-  components/
-    timeline/FilterBar.tsx
-    ui/                   # shadcn 系 + Calendar
-  features/events/
-    components/           # EventBrowser / EventList / EventDetailPanel / LeftNav
-      admin/              # EventForm / EventAdminList / BookmarkletLink
-    hooks/useSavedEvents.ts
-    ingest/               # 取り込み層（コネクタ + 手動登録の共通 upsert）
-    server/getEvents.ts   # Prisma → EventItem のマッピング
-    types/eventItem.ts    # EventItem と表示ラベル
-  hooks/useFilterState.ts # フィルタ状態と URL クエリの同期
-  lib/
-    calendarLink.ts       # Googleカレンダー URL / .ics 生成
-    filters.ts            # applyFilters / isExpired / 期間プリセット
-    metadata/             # fetchPageMeta（取得）/ parsePageMeta（OGP・JSON-LD 抽出）
-prisma/
-  schema.prisma           # Event 単一モデル
-  seed.ts
-```
+## 画面
 
-### 主要コンポーネント
-
-- **`EventBrowser.tsx`** — 3ペインのレイアウトとステートのオーケストレーター。`GRID_OPEN` / `GRID_CLOSED` でグリッド幅を制御。viewMode（list / calendar / saved）、showExpired、selectedId、sortKey を保持。
-- **`LeftNav.tsx`** — ロゴ、今週のサマリ（7日以内に締切 / 今週開催 / 掲載件数）、ビュー切替、テーマ切替。
-- **`EventList.tsx`** — イベントカード一覧。アバター（主催者頭文字）/ タイトル・メタ情報 / 締切カウントダウンリング（SVG）。下部に締切までの進捗バー。
-- **`EventDetailPanel.tsx`** — 詳細ペイン。ヒーローに `DeadlineRing` と保存ボタン、Googleカレンダー追加、`.ics` ダウンロード。以下 Section で概要 / 開催情報 / 賞金・特典 / タグ / リンク。
-- **`FilterBar.tsx`** — 種別・形式・地域は共通の `MultiSelectDropdown` で描画。`useFilterState` と `applyFilters` を利用。
-
-### データモデル（`prisma/schema.prisma`）
-
-`Event` 単一モデル。主催者は文字列で持ち、企業テーブルは作らない。
-
-- `url` が **冪等 upsert のキー**（同じ告知ページを何度取り込んでも重複しない）
-- `kind`（HACKATHON / CONTEST / INTERNSHIP / MEETUP / SEMINAR / OTHER）
-- `format`（ONLINE / OFFLINE / HYBRID）+ `prefecture` + `venue`
-- `startsAt` / `endsAt` / `applyDeadline` — カウントダウンは `applyDeadline ?? startsAt`
-- `prize` — ハッカソン・ビジコンでの主要な判断材料なので独立カラム
-- `ingestSource`（CONNPASS / DOORKEEPER / MYNAVI / X / MANUAL）— 登録 URL のホスト名から自動判定
-
-### イベント取り込み
-
-`src/features/events/ingest/` にコネクタ層がある。
-
-- `types.ts` — `NormalizedEvent` と `EventConnector`（`isEnabled()` / `fetchEvents()`）
-- `classify.ts` — タイトル・タグから `EventKind` / `EventFormat` を推定する純関数
-- `run.ts` — 有効なコネクタを走らせて `url` で upsert。`CONNECTORS` 配列に追加するだけで cron から呼ばれる
-
-**connpass API は申請・審査制**（個人・コミュニティは無償）。<https://help.connpass.com/api/> の利用申請フォームからキーを取得し、`CONNPASS_API_KEY` を設定する。未設定ならそのコネクタは `isEnabled()` が false を返してスキップされる。
-
-`vercel.json` の Cron が毎日 `/api/cron/ingest` を叩く（`CRON_SECRET` による Bearer 認証）。
-
-### 手動登録（マイナビ・X）
-
-マイナビと X は自動取り込みができない。
-
-- **X** — 2026年2月に API の無料枠が廃止。全文検索は Enterprise 契約（月 $42,000〜）
-- **マイナビ** — sitemap の URL は 302 スタブで、リダイレクト先はクエリ文字列付き。robots.txt の `Disallow: /*?` に該当するためクローラでの巡回は不可
-
-そこで `/admin` に管理者向けの手動登録を用意している。
-
-| 入口 | 使い方 |
+| URL | 用途 |
 |---|---|
-| `/admin/new` | 告知ページの URL を貼って「取得」→ OGP / JSON-LD から分かる範囲を前埋め → 確認して登録 |
-| `/admin/bookmarklet` | ブックマークレットをブックマークバーに置き、X やマイナビのページ上でクリック → 登録フォームが開く |
+| `/` | 件数、最近のX投稿、次の予定 |
+| `/posts` | X投稿の保存・検索・編集・削除 |
+| `/companies` | 企業台帳 |
+| `/sources` | 監視先、収集実行、速報候補 |
+| `/events` | イベント一覧、保存済み、カレンダー |
+| `/admin` | イベントの登録・編集・削除 |
 
-ブックマークレットは**自分のブラウザで開いているページの DOM を読むだけ**で、サーバーからページを取得しない。
+## よく使うコマンド
 
-`url` が冪等キーなので、同じページを二度登録しても重複しない。`ingestSource` は URL のホスト名から自動判定する。
+```powershell
+pnpm dev                  # ローカル開発（D1 ローカルDBを使う）
+pnpm test
+pnpm lint
+pnpm build                # next build のみ
+pnpm cf:build             # next build + OpenNext バンドル
+pnpm cf:preview           # workerd（本番と同じランタイム）で確認
+pnpm cf:deploy            # Cloudflare へデプロイ
+pnpm d1:migrate:local     # ローカル D1 にマイグレーション適用
+pnpm d1:migrate:remote    # 本番 D1 にマイグレーション適用
+pnpm d1:export            # prisma/dev.db → D1 投入用の INSERT 文を生成
+```
 
-**概要は 200 文字で保存される**（`DESCRIPTION_MAX_LENGTH`）。告知本文をそのまま複製して再配信しないための制限で、詳細は必ず元ページへのリンクで見せる。
+スキーマを変えたら、Prisma のマイグレーションではなく D1 用の SQL を作って `migrations/` に置きます。
 
-### スタイリング
+```powershell
+npx prisma migrate diff --from-local-d1 --to-schema-datamodel prisma/schema.prisma --script > migrations/0002_xxx.sql
+pnpm d1:migrate:local
+pnpm d1:migrate:remote
+```
 
-- Tailwind + CSS カスタムプロパティ（`src/app/globals.css`）
-  - `--accent: 26 54% 56%`（caramel）/ `--accent-2`（terracotta）/ `--accent-soft`
-  - `--radius: 14px`
-- yui540 風アニメーション群：`yui-fade-rise` / `yui-shine` / `yui-card` / `yui-ring-pulse` / `yui-heading`
-- カードは基本 `rounded-2xl border bg-background` + `yui-card` クラス
+## データモデル
 
----
+- `SavedPost`: X投稿、要約、メモ、タグ、投稿日時
+- `Company`: 企業概要、業界、メモ、タグ
+- `WatchSource`: 監視URL、利用条件の確認、robots判定、最終取得状態、X APIの取得済み投稿ID
+- `Candidate`: 発見した採用・インターン・イベント候補
+- `XUsageDaily`: X APIの投稿取得数、リクエスト数、日別の概算費用
+- `Event`: 開催日時、締切、場所、主催者、カレンダー情報
 
-## デプロイ（Vercel + Neon）
+`SavedPost` と `Event` は任意で `Company` に紐付けられます。企業を削除しても投稿とイベントは残ります。
 
-1. [Neon](https://neon.tech) でプロジェクトを作り、pooled 接続（`DATABASE_URL`）と直接接続（`DIRECT_URL`）を取得する
-2. Vercel にリポジトリを接続し、環境変数を設定
-   - `DATABASE_URL` / `DIRECT_URL` / `CRON_SECRET` / `NEXT_PUBLIC_SITE_URL`
-   - `ADMIN_PASSWORD`（管理画面を使う場合。未設定だと `/admin` は 404）
-   - （キー取得後）`CONNPASS_API_KEY`
-3. `npm run prisma:deploy` でマイグレーションを適用
-4. デプロイ
+## Xの取り込み
 
-`package.json` の `postinstall` で `prisma generate` が走るため、Vercel 側の追加設定は不要。
+`/posts` にある「Xから取り込む」リンクをブックマークバーへドラッグし、保存したいX投稿のページで実行します。現在表示されている投稿本文とURLだけが `localhost:3000` へ渡されます。XのCookieやログイン情報は取得・保存しません。
 
-`src/middleware.ts` は2層になっている。
+X側のDOM変更で取り込みに失敗した場合でも、URLと本文をフォームへ直接貼り付けて保存できます。
 
-- `ADMIN_PASSWORD` — `/admin` と `/api/admin` の Basic 認証。**未設定なら 404 を返して機能ごと無効化する**（設定漏れで管理画面が露出しないように、401 ではなく 404）
-- `SITE_AUTH_PASSWORD` — サイト全体の Basic 認証。ステージング保護用で、一般公開時は未設定にする
+## 毎朝6時の自動収集（Cloudflare Cron Trigger）
+
+`wrangler.jsonc` の `triggers.crons`（`0 21 * * *` = JST 6:00）で Worker の `scheduled` ハンドラが起動し、`scanAllSources()` を実行します。エントリは `worker.ts` です。ログは `npx wrangler tail` で確認できます。
+
+手元で試すときは `npx wrangler dev` を起動し、別のターミナルで `curl "http://127.0.0.1:8787/cdn-cgi/local/scheduled"` を叩きます。
+
+Windows タスクスケジューラ版（`scripts/install-windows-task.ps1` / `install-windows-startup-task.ps1`）は不要になりました。既に登録済みの場合はタスクスケジューラから削除してください。
+
+Xは、無料運用ではCookieや非公式な取得手段を使わず、登録したXアカウントを公式画面で1日1回確認します。必要な場合だけ、公式X APIのBearer Tokenと利用上限を`.env.local`へ設定し、`X API（上限付き）`の監視先として日次収集できます。初期状態は無効で、トークンがない限り外部APIへ通信しません。
+
+## Windowsログイン時の自動起動
+
+`npm run startup:install` を一度実行すると、Windowsタスクスケジューラに `DailyNews Local Server` が登録されます。Windowsにサインインしたとき、DailyNewsがまだ起動していなければ `127.0.0.1:3000` で起動します。既に同ポートが使われている場合は二重起動しません。タスク登録がWindowsの権限で許可されないPCでは、同じ本人アカウントだけのWindows起動項目へ自動登録します。ログは `logs/dailynews-ui-*.log` に保存されます。
+
+## 現在の運用状況（2026-09-14 時点）
+
+- 本番: <https://dailynews.ppajt5zzcf.workers.dev>（Cloudflare Access で本人のみ）
+- **Workers Free の CPU 10ms/リクエスト制限に当たるため、ページを開くと Error 1102 になる。** 運用するには Workers Paid（$5/月）への切り替えが必要
+- そのため **X フィードの収集は一時停止中**（`wrangler.jsonc` の `X_API_ENABLED` を `"false"` に。再開時は `"true"` に戻して再デプロイ）
+- ローカル（`pnpm dev`）は D1 のローカルDBで通常どおり動く
+
+## Cloudflare へのデプロイ
+
+1. `npx wrangler login`
+2. `npx wrangler d1 create dailynews` → 表示された `database_id` を `wrangler.jsonc` に書く
+3. `pnpm d1:migrate:remote` でテーブルを作る
+4. `pnpm d1:export` → 生成された SQL を `npx wrangler d1 execute dailynews --remote --file=...` で投入
+5. シークレットを登録する
+   ```powershell
+   npx wrangler secret put OPENAI_API_KEY
+   npx wrangler secret put X_API_BEARER_TOKEN
+   npx wrangler secret put GOOGLE_CLIENT_ID
+   npx wrangler secret put GOOGLE_CLIENT_SECRET
+   npx wrangler secret put GOOGLE_TOKEN_ENCRYPTION_KEY
+   ```
+6. `wrangler.jsonc` の `vars.GOOGLE_OAUTH_REDIRECT_URI` を本番URLに直し、Google Cloud Console の承認済みリダイレクトURIにも同じ値を追加する
+7. `pnpm cf:deploy`
+8. **Cloudflare ダッシュボード → Workers → dailynews → Access で本人のメールアドレスだけを許可する**（プレビューURLも保護対象に含める）
+
+`.dev.vars` はデプロイに含まれません（`wrangler deploy --dry-run` で確認済み）。本番の秘密情報は必ず `wrangler secret put` で登録します。
+
+### アクセス制御について
+
+このアプリは Gmail / Google Calendar の読み取りトークン、OpenAI と X の API キーを扱い、任意 URL を取得する管理APIも持ちます。
+**「URLを知っている人だけ」方式（秘密リンク）では守れません**。URLは履歴・ブックマーク同期・スクリーンショットから漏れ、漏れても気づけず、失効もできないためです。
+Cloudflare Access なら Worker に紐づくすべてのホスト名（`workers.dev`・独自ドメイン・プレビューURL）がまとめて保護され、50人まで無料で、アプリ側のコード変更も不要です。
+
+なお `/api/admin/preview` と収集処理は任意URLを取得するため、Access とは別に SSRF ガード（`src/lib/metadata/fetchPageMeta.ts` の `assertPublicUrl`）を通しています。Workers では `node:dns` の `lookup` が使えないので `resolve4` / `resolve6` で名前解決しています。
+
+設計・技術・法律上の前提・運用手順は [設計記録](docs/DAILY_NEWS_DESIGN.md) にまとめています。

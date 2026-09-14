@@ -61,6 +61,7 @@ export function ingestSourceFromUrl(url: string): IngestSource {
  */
 export type EventItem = {
   id: string;
+  companyId?: string;
   url: string;
   ingestSource: IngestSource;
 

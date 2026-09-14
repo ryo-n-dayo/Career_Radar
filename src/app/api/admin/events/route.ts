@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 
 import { parseEventInput } from "@/features/events/ingest/parseEventInput";
-import { upsertEvent } from "@/features/events/ingest/upsert";
+import { updateEvent, upsertEvent } from "@/features/events/ingest/upsert";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-/** 認証は middleware.ts の /api/admin ガードに任せている。 */
+/** 認証は Cloudflare Access（Worker 単位のポリシー）に任せている。アプリ内には認証を持たない。 */
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
@@ -18,13 +18,14 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const outcome = await upsertEvent(parsed.value);
+    const id = typeof body?.id === "string" ? body.id.trim() : "";
+    const outcome = id ? (await updateEvent(id, parsed.value), "updated" as const) : await upsertEvent(parsed.value);
     const event = await prisma.event.findUnique({
       where: { url: parsed.value.url },
       select: { id: true }
     });
 
-    // トップ（ISR 10分）と個別ページを即座に反映させる
+    // 全ページ force-dynamic なので実質 no-op だが、キャッシュを入れた時に効くよう残す
     revalidatePath("/");
     if (event) revalidatePath(`/events/${event.id}`);
 
