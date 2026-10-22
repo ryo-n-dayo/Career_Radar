@@ -27,11 +27,13 @@ Career Radar を個人で開発し、株式会社サポーターズによるサ�
 | フロントエンド | Next.js 14 / React / TypeScript / Tailwind CSS | 画面表示・操作・ダッシュボードUI |
 | バックエンド | Next.js Route Handlers / Prisma | API・データ処理 |
 | データベース | SQLite (`prisma/dev.db`) | ローカルでのデータ保存 |
-| 外部連携 | Google OAuth 2.0 / Gmail API / Google Calendar API / GNews API | 認証・メール・予定・ニュースの連携 |
+| 外部連携 | Google OAuth 2.0 / Gmail API / Google Calendar API | 認証・メール・予定の連携 |
+| 情報収集 | GNews API / Qiita API / はてなブックマーク・Zenn の RSS / 企業の公式サイト | ニュースの集約・企業サイトの更新チェック |
+| AI（任意） | OpenAI API / Anthropic API | 要約・分類（API キーを設定したときだけ有効） |
 
 ### 使っていないもの
 
-このリポジトリの現行実装では、外部 PostgreSQL / Supabase、クラウドストレージ、独立したバックエンドサーバーは使用していません。データはローカルの SQLite に保存し、外部サービスとの連携は Google API などに限定しています。
+このリポジトリの現行実装では、外部 PostgreSQL / Supabase、クラウドストレージ、独立したバックエンドサーバーは使用していません。データはローカルの SQLite に保存します。外部へのアクセスは、上の表にある Google API・情報収集・AI（任意）だけです。
 
 ## ローカルで起動する
 
@@ -55,8 +57,8 @@ npm run dev
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth の認証情報 |
 | `GOOGLE_CALLBACK_URL` | OAuth のリダイレクト先 |
 | `GNEWS_API_KEY` | ニュース取得 |
-| `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` | 任意の AI 要約機能 |
-| `CRON_SECRET` | Vercel Cron の保護 |
+| `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` | 任意。AI による要約・分類 |
+| `CRON_SECRET` | 定期実行用 API の保護（`/api/cron/daily-fetch` は未設定だと動きません） |
 | `NEXT_PUBLIC_DEMO_USER_ID` | 任意のデモ用ユーザー ID |
 
 実際の API キー、OAuth シークレット、ローカルDB、ビルド生成物は GitHub にコミットしません。
